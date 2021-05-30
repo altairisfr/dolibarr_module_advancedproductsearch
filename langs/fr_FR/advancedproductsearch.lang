@@ -62,3 +62,4 @@ ErrrorRemiseMustBeAValidPercent = Erreur : la remise doit être une valeur compr
 SearchRef = Référence recherchée
 SearchLabel = Libellé recherché
 NotEnoughRights = Cette action ne vous est pas authorisée
+ErrorMissingModuleDiscountRule = Erreur : le module règle de remise est installé mais semble supprimé

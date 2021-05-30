@@ -198,14 +198,14 @@ if (empty($dolibarr_nocache)) {
 	display:block;
 }
 
-.discount-prod-list-action-btn{
+.advance-prod-search-list-action-btn{
 	cursor: pointer;
 	margin-left: 10px;
 }
-.discount-prod-list-action-btn:hover{
+.advance-prod-search-list-action-btn:hover{
 	color: #0b419b;
 }
-.discount-prod-list-action-btn:focus{
+.advance-prod-search-list-action-btn:focus{
 	color: #0b419b;
 }
 

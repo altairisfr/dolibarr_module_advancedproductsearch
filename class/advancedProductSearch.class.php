@@ -459,6 +459,41 @@ class AdvancedProductSearch extends CommonObject
 					$resProd = $product->fetch($obj->rowid);
 					if($resProd > 0){
 						$product->load_stock();
+
+						// Réduction par défaut du client
+						$reduction = doubleval($object->thirdparty->remise_percent);
+
+						// Prix unitaire du produit avec prise en compte des niveau de prix et du client
+						$subprice = self::getProductSellPrice($product->id, $fk_company);
+
+						// calcule du prix unitaire final apres réduction
+						$finalSubprice = $subprice - $subprice*$reduction/100;
+
+						// COMPTATIBILITE MODULE DISCOUNT RULE : RECHERCHE DE REGLE DE TARIFICATION
+						if (!empty($conf->discountrules->enabled)){
+							if(!class_exists('DiscountSearch')){ dol_include_once('/discountrules/class/discountSearch.class.php'); }
+							if(class_exists('DiscountSearch')) { // Il est possible que le module soit supprimé mais pas désinstallé
+								$discountSearch = new DiscountSearch($db);
+								$subprice = DiscountSearch::getProductSellPrice($product->id, $fk_company);
+								$discountSearchResult = $discountSearch->search(0, $product->id, $fk_company, $fk_project);
+								if ($discountSearchResult->result) {
+									// Mise en page du résultat
+									$discountSearchResult->tpMsg = getDiscountRulesInterfaceMessageTpl($langs, $discountSearchResult, $action);
+									$subprice = $discountSearchResult->subprice;
+									$finalSubprice = $discountSearchResult->calcFinalSubprice();
+
+									if (!empty($discountSearchResult->reduction)) {
+										$reduction = $discountSearchResult->reduction;
+									}
+								}
+							}
+							else{
+								setEventMessage($langs->trans('ErrorMissingModuleDiscountRule'));
+							}
+						}
+
+
+
 						$output.= '<tr class="advanced-product-search-row --data" data-product="'.$product->id.'"  >';
 						$output.= '<td class="advanced-product-search-col --ref" >'. $product->getNomUrl(1).'</td>';
 						$output.= '<td class="advanced-product-search-col --label" >'. $product->label.'</td>';
@@ -502,19 +537,6 @@ class AdvancedProductSearch extends CommonObject
 						}
 
 
-						// Search discount
-						$subprice = self::getProductSellPrice($product->id, $fk_company);
-						if (!empty($conf->discountrules->enabled)){
-							$discountSearch = new DiscountSearch($db);
-							$subprice = DiscountSearch::getProductSellPrice($product->id, $fk_company);
-							$discountSearchResult = $discountSearch->search(0, $product->id, $fk_company, $fk_project);
-							if ($discountSearchResult->result && !empty($discountSearchResult->subprice)) {
-								// Mise en page du résultat
-								$discountSearchResult->tpMsg = getDiscountRulesInterfaceMessageTpl($langs, $discountSearchResult, $action);
-								$subprice = $discountSearchResult->subprice;
-							}
-						}
-
 						//
 						$output.= '<td class="advanced-product-search-col --subprice right nowraponall" >';
 						$output.= '<input id="advanced-product-search-list-input-subprice-'.$product->id.'"  data-product="'.$product->id.'"   class="advanced-product-search-list-input-subprice right on-update-calc-prices" type="number" step="any" min="0" maxlength="8" size="3" value="'.$subprice.'" placeholder="x" name="prodsubprice['.$product->id.']" />';
@@ -523,21 +545,12 @@ class AdvancedProductSearch extends CommonObject
 
 						// REDUCTION EN %
 						$output.= '<td class="advanced-product-search-col --discount center" >';
-						$reduction = $object->thirdparty->remise_percent;
-						if (!empty($discountSearchResult->reduction)) {
-							$reduction = $discountSearchResult->reduction;
-						}
 						$output.= '<input id="advanced-product-search-list-input-reduction-'.$product->id.'"  data-product="'.$product->id.'"   class="advanced-product-search-list-input-reduction center on-update-calc-prices" type="number" step="any" min="0" max="100" maxlength="3" size="3" value="'.$reduction.'" placeholder="%" name="prodreduction['.$product->id.']" />';
 						$output.= '%';
 						$output.= '</td>';
 
 						// FINAL SUBPRICE AFTER REDUCTION
 						$output.= '<td class="advanced-product-search-col --finalsubprice right" >';
-						if ($discountSearchResult->result) {
-							$finalSubprice = $discountSearchResult->calcFinalSubprice();
-						} else {
-							$finalSubprice = self::getProductSellPrice($product->id, $fk_company);
-						}
 						$output.= '<span id="discount-prod-list-final-subprice-'.$product->id.'"  class="final-subpriceprice" >'.price(round($finalSubprice, $conf->global->MAIN_MAX_DECIMALS_UNIT)).'</span> '.$langs->trans("HT");
 						$output.= '</td>';
 
@@ -561,7 +574,7 @@ class AdvancedProductSearch extends CommonObject
 
 						$output.= '<td class="advanced-product-search-col --action" >';
 //					$output.= '<div class="default-hidden" >';
-						$output.= ' <button type="button" title="'.$langs->trans('ClickToAddProductInDocument').'"  data-product="'.$product->id.'" class="discount-prod-list-action-btn" ><span class="fa fa-plus add-btn-icon"></span> '.$langs->trans('Add').'</button>';
+						$output.= ' <button type="button" title="'.$langs->trans('ClickToAddProductInDocument').'"  data-product="'.$product->id.'" class="advance-prod-search-list-action-btn" ><span class="fa fa-plus add-btn-icon"></span> '.$langs->trans('Add').'</button>';
 //					$output.= '</div>';
 						$output.= '</td>';
 

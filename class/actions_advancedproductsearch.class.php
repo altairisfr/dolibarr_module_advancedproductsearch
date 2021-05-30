@@ -16,15 +16,15 @@
  */
 
 /**
- * \file    class/actions_discountrules.class.php
- * \ingroup discountrules
+ * \file    class/actions_advancedproductsearch.class.php
+ * \ingroup advancedproductsearch
  * \brief   Example hook overload.
  *
  * Put detailed description here.
  */
 
 /**
- * Class Actionsdiscountrules
+ * Class ActionsAdvancedProductSearch
  */
 class ActionsAdvancedProductSearch {
     /**
@@ -98,7 +98,7 @@ class ActionsAdvancedProductSearch {
 
 		$context = explode(':', $parameters['context']);
 
-		$langs->loadLangs(array('discountrules'));
+		$langs->loadLangs(array('advancedproductsearch'));
 		if (in_array('propalcard', $context) || in_array('ordercard', $context) || in_array('invoicecard', $context) )
 		{
 			/** @var CommonObject $object */
@@ -118,11 +118,10 @@ class ActionsAdvancedProductSearch {
 			if (($user->socid > 0 || empty($TWriteRight[$object->element]))) {
 				return 0;
 			}
-
-			print '<button type="button" id="product-search-dialog-button" class="classfortooltip" data-target-element="'.$object->element.'" data-target-id="'.$object->id.'" title="'.$langs->trans("OpenSearchProductBox").'" ><i class="fa fa-search" ></i></button>';
 			// ADD DISCOUNT RULES SEARCH ON DOCUMENT ADD LINE FORM
+			print '<!-- MODULE advanced-product-search -->'."\r\n";
+			print '<button type="button" id="product-search-dialog-button" class="classfortooltip" data-target-element="'.$object->element.'" data-target-id="'.$object->id.'" title="'.$langs->trans("OpenSearchProductBox").'" ><i class="fa fa-search" ></i></button>';
 			?>
-			<!-- MODULE advanced-product-search -->
 			<script type="text/javascript">
 				$(document).ready(function(){
 					// ADD SEARCH BOX BUTTON
