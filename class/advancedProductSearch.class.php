@@ -474,7 +474,7 @@ class AdvancedProductSearch extends CommonObject
 							if(!class_exists('DiscountSearch')){ dol_include_once('/discountrules/class/discountSearch.class.php'); }
 							if(class_exists('DiscountSearch')) { // Il est possible que le module soit supprimé mais pas désinstallé
 								$discountSearch = new DiscountSearch($db);
-								$subprice = DiscountSearch::getProductSellPrice($product->id, $fk_company);
+								$subprice = DiscountRule::getProductSellPrice($product->id, $fk_company);
 								$discountSearchResult = $discountSearch->search(0, $product->id, $fk_company, $fk_project);
 								if ($discountSearchResult->result) {
 									// Mise en page du résultat
