@@ -129,7 +129,7 @@ $( document ).ready(function() {
 
 
 	// Ajout de produits sur click du bouton
-	$(document).on("click", ".discount-prod-list-action-btn" , function(event) {
+	$(document).on("click", ".advance-prod-search-list-action-btn.--addProductToLine" , function(event) {
 		event.preventDefault();
 		let fk_product = $(this).attr("data-product");
 		AdvancedProductSearch.addProductToCurentDocument(fk_product);
