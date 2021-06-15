@@ -574,7 +574,7 @@ class AdvancedProductSearch extends CommonObject
 
 						$output.= '<td class="advanced-product-search-col --action" >';
 //					$output.= '<div class="default-hidden" >';
-						$output.= ' <button type="button" title="'.$langs->trans('ClickToAddProductInDocument').'"  data-product="'.$product->id.'" class="advance-prod-search-list-action-btn" ><span class="fa fa-plus add-btn-icon"></span> '.$langs->trans('Add').'</button>';
+						$output.= ' <button type="button" title="'.$langs->trans('ClickToAddProductInDocument').'"  data-product="'.$product->id.'" class="advance-prod-search-list-action-btn --addProductToLine" ><span class="fa fa-plus add-btn-icon"></span> '.$langs->trans('Add').'</button>';
 //					$output.= '</div>';
 						$output.= '</td>';
 
