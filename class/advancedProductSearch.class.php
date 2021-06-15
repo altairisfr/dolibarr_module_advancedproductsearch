@@ -496,7 +496,7 @@ class AdvancedProductSearch extends CommonObject
 
 						$output.= '<tr class="advanced-product-search-row --data" data-product="'.$product->id.'"  >';
 						$output.= '<td class="advanced-product-search-col --ref" >'. $product->getNomUrl(1).'</td>';
-						$output.= '<td class="advanced-product-search-col --label" >'. $product->label.'</td>';
+						$output.= '<td class="advanced-product-search-col --label" >'. self::highlightWordsOfSearchQuery($product->label, $search_label.' '.$sall).'</td>';
 						if($conf->stock->enabled) {
 							$output .= '<td class="advanced-product-search-col --stock-reel" >' . $product->stock_reel . '</td>';
 							$output .= '<td class="advanced-product-search-col --stock-theorique" >' . $product->stock_theorique . '</td>';
@@ -908,4 +908,37 @@ class AdvancedProductSearch extends CommonObject
 
 		return false;
 	}
+
+	/**
+	 * @param string $haystack
+	 * @param string $needle
+	 * @param string $backgroundColor
+	 * @param string $color
+	 * @return array|string|string[]
+	 */
+	public static function highlightString( $haystack, $needle, $backgroundColor = '#feff0370', $color = "#000") {
+		if(empty($needle)){ return $haystack; }
+		$needle = utf8_encode(strtr(utf8_decode($needle),utf8_decode("ÀÁÂàÄÅàáâàäåÒÓÔÕÖØòóôõöøÈÉÊËèéêëÇçÌÍÎÏìíîïÙÚÛÜùúûüÿÑñ"),"aaaaaaaaaaaaooooooooooooeeeeeeeecciiiiiiiiuuuuuuuuynn"));
+		$needle = str_replace('a', '[aàáâãäå]', $needle);
+		$needle = str_replace('e', '[eèéêë]', $needle);
+		$needle = str_replace('i', '[íîìï]', $needle);
+		$needle = str_replace('o', '[óôòøõö]', $needle);
+		$needle = str_replace('u', '[úûùü]', $needle);
+
+		return preg_replace("/($needle)/iu", sprintf('<span style="background-color: %s; color:%s;">$1</span>', $backgroundColor, $color), $haystack);
+	}
+
+	function highlightWordsOfSearchQuery( $content, $searchQuery) {
+
+		$words = explode(' ', $searchQuery);
+		$words = array_unique($words);
+		$words = array_map('trim', $words);
+		// loop through words
+		foreach( $words as $word ) {
+			$content = self::highlightString( $content, $word); // highlight word
+		}
+
+		return $content; // return highlighted data
+	}
+
 }
