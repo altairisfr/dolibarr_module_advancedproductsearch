@@ -2,7 +2,14 @@
 
 ## Features
 
-Description of the module...
+Ajoute sur le formulaire d'ajout de ligne des documents devis, commandes et factures clients la possibilité d'effectuer des recherches de produits sur des ensembles de critères.
+
+Ce module est compatible avec le module DiscountRule en version supérieur ou égale à 2.7 les prix et remises utilisent alors le moteur du module DiscountRules et permet de béneficier de toute la puissance de la gestion tarifaire de ce dernier.
+
+Evolutions à apporter :
+- Gestion des extrafields de ligne (à minima pour ceux obligatoires)
+- Sur la liste de recherche permettre la sélection des colonnes à afficher
+- Permettre une recherche sur les extrafields des produits.
 
 <!--
 ![Screenshot advancedproductsearch](img/screenshot_advancedproductsearch.png?raw=true "AdvancedProductSearch"){imgmd}
