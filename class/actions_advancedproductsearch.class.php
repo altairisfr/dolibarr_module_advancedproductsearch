@@ -98,7 +98,7 @@ class ActionsAdvancedProductSearch {
 
 		$context = explode(':', $parameters['context']);
 
-		$langs->loadLangs(array('advancedproductsearch'));
+		$langs->loadLangs(array('advancedproductsearch@advancedproductsearch'));
 		if (in_array('propalcard', $context) || in_array('ordercard', $context) || in_array('invoicecard', $context) )
 		{
 			/** @var CommonObject $object */
