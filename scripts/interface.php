@@ -176,19 +176,106 @@ if ($action === 'add-product') {
 							/**
 							 * @var Commande $object
 							 */
-							$resAdd = $object->addline($desc, $pu_ht, $qty, $txtva, $txlocaltax1, $txlocaltax2, $fk_product, $remise_percent, $info_bits, $fk_remise_except, $price_base_type, $pu_ttc, $date_start, $date_end, $type, $rang, $special_code, $fk_parent_line, $fk_fournprice, $pa_ht, $label, $array_options, $fk_unit, $origin, $origin_id, $pu_ht_devise);
+							$resAdd = $object->addline(
+								$desc,
+								$pu_ht,
+								$qty,
+								$txtva,
+								$txlocaltax1,
+								$txlocaltax2,
+								$fk_product,
+								$remise_percent,
+								$info_bits,
+								$fk_remise_except,
+								$price_base_type,
+								$pu_ttc,
+								$date_start,
+								$date_end,
+								$type,
+								$rang,
+								$special_code,
+								$fk_parent_line,
+								$fk_fournprice,
+								$pa_ht,
+								$label,
+								$array_options,
+								$fk_unit,
+								$origin,
+								$origin_id,
+								$pu_ht_devise
+                            );
 						}
 						elseif($element=='propal') {
 							/**
 							 * @var Propal $object
 							 */
-							$resAdd = $object->addline($desc, $pu_ht, $qty, $txtva, $txlocaltax1, $txlocaltax2, $fk_product, $remise_percent, $price_base_type, $pu_ttc, $info_bits, $type, $rang, $special_code, $fk_parent_line, $fk_fournprice, $pa_ht, $label, $date_start, $date_end, $array_options, $fk_unit, $origin, $origin_id, $pu_ht_devise, $fk_remise_except);
+							$resAdd = $object->addline(
+								$desc,
+								$pu_ht,
+								$qty,
+								$txtva,
+								$txlocaltax1,
+								$txlocaltax2,
+								$fk_product,
+								$remise_percent,
+								$price_base_type,
+								$pu_ttc,
+								$info_bits,
+								$type,
+								$rang,
+								$special_code,
+								$fk_parent_line,
+								$fk_fournprice,
+								$pa_ht,
+								$label,
+								$date_start,
+								$date_end,
+								$array_options,
+								$fk_unit,
+								$origin,
+								$origin_id,
+								$pu_ht_devise,
+								$fk_remise_except
+							);
 						}
 						elseif($element=='facture') {
 							/**
 							 * @var Propal $object
 							 */
-							$resAdd = $object->addline($desc, $pu_ht, $qty, $txtva, $txlocaltax1, $txlocaltax2, $fk_product, $remise_percent, $price_base_type, $pu_ttc, $info_bits, $type, $rang, $special_code, $fk_parent_line, $fk_fournprice, $pa_ht, $label, $date_start, $date_end, $array_options, $fk_unit, $origin, $origin_id, $pu_ht_devise, $fk_remise_except);
+							$ventil = 0;
+							$situation_percent = 100;
+							$fk_prev_id = '';
+							$resAdd = $object->addline(
+								$desc,
+								$pu_ht,
+								$qty,
+								$txtva,
+								$txlocaltax1,
+								$txlocaltax2,
+								$fk_product,
+								$remise_percent,
+								$date_start,
+								$date_end,
+								$ventil,
+								$info_bits,
+								$fk_remise_except,
+								$price_base_type,
+								$pu_ttc,
+								$type,
+								$rang,
+								$special_code,
+								$origin,
+								$origin_id,
+								$fk_parent_line,
+								$fk_fournprice,
+								$pa_ht,
+								$label,
+								$array_options,
+								$situation_percent,
+								$fk_prev_id,
+								$fk_unit,
+								$pu_ht_devise
+							);
 						}
 						else {
 							$jsonResponse->msg = $langs->trans('DocumentNotAvailable').': '.$element;
