@@ -46,6 +46,8 @@ if (! $res && file_exists("../../main.inc.php")) $res=@include("../../main.inc.p
 if (! $res && file_exists("../../../main.inc.php")) $res=@include("../../../main.inc.php");
 if (! $res) die("Include of main fails");
 
+require_once __DIR__ . '/../class/advancedProductSearch.class.php';
+
 // Define js type
 header('Content-Type: application/javascript');
 // Important: Following code is to cache this file to avoid page request by browser at each Dolibarr page access.
@@ -69,11 +71,15 @@ if ($langs->transnoentitiesnoconv("SeparatorThousand") != "SeparatorThousand") $
 if ($thousand == 'None') $thousand = '';
 elseif ($thousand == 'Space') $thousand = ' ';
 
+$AdvancedProductSearch = new AdvancedProductSearch($db);
+
 $confToJs = array(
 	'MAIN_MAX_DECIMALS_TOT' => $conf->global->MAIN_MAX_DECIMALS_TOT,
 	'MAIN_MAX_DECIMALS_UNIT' => $conf->global->MAIN_MAX_DECIMALS_UNIT,
 	'dec' => $dec,
 	'thousand' => $thousand,
+	'interface_url' => dol_buildpath('advancedproductsearch/scripts/interface.php',1),
+	'supplierElements' => $AdvancedProductSearch->supplierElements
 );
 
 ?>
@@ -113,6 +119,17 @@ $( document ).ready(function() {
 			typingProductSearchTimer = setTimeout(function(){
 				AdvancedProductSearch.discountLoadSearchProductDialogForm("&"+$( "#product-search-dialog-form" ).serialize());
 			}, doneTypingProductSearchInterval);
+		}
+	});
+
+
+
+	$(document).on("change", "[name^=prodfourprice]", function() {
+		// limité au côté fournisseur
+		if(AdvancedProductSearch.isSupplierDocument()){
+			let fk_product = $(this).attr("data-product");
+			$("#advanced-product-search-list-input-subprice-" + fk_product).val($(this).find(':selected').data('up'));
+			$("#advanced-product-search-list-input-subprice-" + fk_product).trigger('change');
 		}
 	});
 
@@ -173,6 +190,10 @@ $( document ).ready(function() {
 			},
 			open: function( event, ui ) {
 				//$(this).dialog('option', 'maxHeight', $(window).height()-30);
+
+				AdvancedProductSearch.element = element;
+				AdvancedProductSearch.fk_element = fk_element;
+
 				AdvancedProductSearch.discountLoadSearchProductDialogForm("&element="+element+"&fk_element="+fk_element);
 				$('#'+productSearchDialogBox).parent().css('z-index', 1002);
 				$('.ui-widget-overlay').css('z-index', 1001);
@@ -191,7 +212,7 @@ $( document ).ready(function() {
 	var typingQtySearchDiscountTimer;                //timer identifier
 	var doneTypingQtySearchDiscountInterval = 200;  //time in ms (0.2 seconds)
 	$(document).on("change", ".advanced-product-search-list-input-qty" , function(event) {
-		if(DiscountRule != undefined){ // il faut bien vérifier que discountrule est présent
+		if(DiscountRule != undefined && !AdvancedProductSearch.isSupplierDocument()){ // il faut bien vérifier que discountrule est présent
 			var fk_product = $(this).attr("data-product");
 			clearTimeout(typingQtySearchDiscountTimer);
 			typingQtySearchDiscountTimer = setTimeout(function(){
@@ -233,8 +254,11 @@ var AdvancedProductSearch = {};
 	o.lastqty = 0;
 
 	o.discountlang = <?php print json_encode($translate) ?>;
-	o.advancedProductSearchConfig = <?php print json_encode($confToJs) ?>;
+	o.config = <?php print json_encode($confToJs) ?>;
 	o.dialogCountAddedProduct = 0;
+
+	o.element = '';
+	o.fk_element = 0;
 
 	/**
 	 * Load product search dialog form
@@ -248,7 +272,7 @@ var AdvancedProductSearch = {};
 
 		$('#'+productSearchDialogBox).prepend($('<div class="inner-dialog-overlay"><div class="dialog-loading__loading"><div class="dialog-loading__spinner-wrapper"><span class="dialog-loading__spinner-text">LOADING</span><span class="dialog-loading__spinner"></span></div></div></div>'));
 
-		$('#'+productSearchDialogBox).load( "<?php print dol_buildpath('advancedproductsearch/scripts/interface.php',1)."?action=product-search-form"; ?>" + morefilters, function() {
+		$('#'+productSearchDialogBox).load( o.config.interface_url + '?action=product-search-form' + morefilters, function() {
 			o.dialogCountAddedProduct = 0; // init count of product added for reload action
 			o.focusAtEndSearchInput($("#search-all-form-input"));
 
@@ -296,7 +320,11 @@ var AdvancedProductSearch = {};
 		}
 	}
 
-
+	/**
+	 *
+	 * @param msg
+	 * @param status
+	 */
 	o.setEventMessage = function (msg, status = true){
 
 		if(msg.length > 0){
@@ -370,13 +398,13 @@ var AdvancedProductSearch = {};
 		}
 
 		let finalUnitPrice = subPrice - (subPrice * reduction / 100);
-		finalUnitPrice = Number(finalUnitPrice.toFixed(o.advancedProductSearchConfig.MAIN_MAX_DECIMALS_UNIT));
+		finalUnitPrice = Number(finalUnitPrice.toFixed(o.config.MAIN_MAX_DECIMALS_UNIT));
 
 		let finalPrice = finalUnitPrice*qty;
-		finalPrice = Number(finalPrice.toFixed(o.advancedProductSearchConfig.MAIN_MAX_DECIMALS_TOT));
+		finalPrice = Number(finalPrice.toFixed(o.config.MAIN_MAX_DECIMALS_TOT));
 
-		$("#discount-prod-list-final-subprice-"+fk_product).html(finalUnitPrice.toLocaleString(undefined, { minimumFractionDigits: o.advancedProductSearchConfig.MAIN_MAX_DECIMALS_TOT, maximumFractionDigits: o.advancedProductSearchConfig.MAIN_MAX_DECIMALS_UNIT }));
-		$("#discount-prod-list-final-price-"+fk_product).html(finalPrice.toLocaleString(undefined, { minimumFractionDigits: o.advancedProductSearchConfig.MAIN_MAX_DECIMALS_TOT }));
+		$("#discount-prod-list-final-subprice-"+fk_product).html(finalUnitPrice.toLocaleString(undefined, { minimumFractionDigits: o.config.MAIN_MAX_DECIMALS_TOT, maximumFractionDigits: o.config.MAIN_MAX_DECIMALS_UNIT }));
+		$("#discount-prod-list-final-price-"+fk_product).html(finalPrice.toLocaleString(undefined, { minimumFractionDigits: o.config.MAIN_MAX_DECIMALS_TOT }));
 	}
 
 	/**
@@ -390,14 +418,50 @@ var AdvancedProductSearch = {};
 
 
 	/**
+	 * Will init document info from loaded ajax form
+	 */
+	o.initCurrentDocumentObjectVarsFromForm = function (){
+		o.fk_element = $("#advancedproductsearch-form-fk-element").val();
+		o.element = $("#advancedproductsearch-form-element").val();
+	}
+
+	/**
+	 *
+	 * @returns {boolean}
+	 */
+	o.isSupplierDocument = function (){
+		if(o.inArray(o.element, o.config.supplierElements)){
+			return true;
+		} else {
+			return false;
+		}
+	}
+
+	/**
+	 * equivalent de in_array en php
+	 * @param needle
+	 * @param haystack
+	 * @returns {boolean}
+	 */
+	o.inArray = function inArray(needle, haystack) {
+		var length = haystack.length;
+		for(var i = 0; i < length; i++) {
+			if(haystack[i] == needle) return true;
+		}
+		return false;
+	}
+
+	/**
 	 *
 	 * @param fk_product
 	 */
 	o.addProductToCurentDocument = function (fk_product){
-		var urlInterface = "<?php print dol_buildpath('advancedproductsearch/scripts/interface.php', 1); ?>";
+		var urlInterface = o.config.interface_url;
 
 		// disable action button during add
 		o.disableAddProductFields(fk_product, true);
+
+		o.initCurrentDocumentObjectVarsFromForm();
 
 		var sendData = {
 			'action': "add-product",
@@ -405,8 +469,8 @@ var AdvancedProductSearch = {};
 			'qty': $("#advanced-product-search-list-input-qty-"+fk_product).val(),
 			'subprice': $("#advanced-product-search-list-input-subprice-"+fk_product).val(),
 			'reduction': $("#advanced-product-search-list-input-reduction-"+fk_product).val(),
-			'fk_element': $("#advancedproductsearch-form-fk-element").val(),
-			'element': $("#advancedproductsearch-form-element").val()
+			'fk_element': o.fk_element,
+			'element': o.element
 		};
 
 		// check if supplier price exist because it could be not activated
