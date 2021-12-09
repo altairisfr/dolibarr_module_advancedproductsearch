@@ -541,7 +541,7 @@ class AdvancedProductSearch extends CommonObject
 									unset($selectArray['pmpprice']);
 									unset($selectArray['costprice']);
 									if(!empty($selectArray)) {
-										if(count($selectArray) == 1) {
+										if(count($selectArray) == 1 && ($object->element !== 'supplier_proposal' || $conf->global->ADVANCED_PRODUCT_SEARCH_PRESELECT_IF_ONE_FOURN_PRICE_ON_SUPPLIER_PROPOSAL)) {
 											$idSelected = key($selectArray);
 											$subprice = $selectArray[$idSelected]['data-up'];
 											// Recalcul du subprice final
