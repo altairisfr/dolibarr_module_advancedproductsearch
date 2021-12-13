@@ -137,7 +137,8 @@ if (empty($dolibarr_nocache)) {
 }
 
 .advanced-product-global-search-input {
-	width: 100%;
+	width: 100%; /* for retrocompatibility */
+	width: calc(100% - 30px); /* include help icon*/
 	padding: 10px 35px 10px 20px;
 
 	background-color: transparent;
@@ -161,6 +162,11 @@ if (empty($dolibarr_nocache)) {
 	font-style: oblique;
 	max-width: 600px;
 
+}
+
+.advanced-product-global-search-input + .fa{
+	color: #b5b5b5;
+	margin-left : 5px;
 }
 
 .advanced-product-global-search-input::placeholder {

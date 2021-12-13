@@ -67,3 +67,7 @@ FinalDiscountPrice = Prix final
 
 PredefinedFournPricesForFill=Prix d'achat prédéfinis
 PredefinedFournPricesForFillHelp=Sélectionnez un tarif dans la liste pour remplir automatiquement la colonne "Prix"
+
+ProductCategories = Tags/catégories produits
+SearchWillBeOnTheseFields = La recherche globale s'effectue sur les champs suivants : %s
+ProductRefFourn = Référence fournisseur
