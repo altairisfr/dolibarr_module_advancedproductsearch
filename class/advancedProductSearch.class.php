@@ -191,6 +191,7 @@ class AdvancedProductSearch extends CommonObject
 
 		// List of fields to search into when doing a "search in all"
 		$fieldstosearchall = array('p.ref','p.label','p.description',"p.note");
+		$fieldstosearchallText =array('Ref', 'Label', 'Description', 'Note');
 
 		// multilang
 		if (!empty($conf->global->MAIN_MULTILANGS)){
@@ -199,11 +200,13 @@ class AdvancedProductSearch extends CommonObject
 
 		if (!empty($conf->barcode->enabled)) {
 			$fieldstosearchall+=  array('p.barcode','pfp.barcode');
+			$fieldstosearchallText[]='Barcode';
 		}
 
 		// Filter on supplier
 		if (!empty($conf->fournisseur->enabled)){
 			$fieldstosearchall+=  array('pfp.ref_fourn');
+			$fieldstosearchallText[]='ProductRefFourn';
 		}
 
 		// SELECT PART
@@ -297,7 +300,15 @@ class AdvancedProductSearch extends CommonObject
 		}
 
 		$morehtmlcenter= '<div class="advanced-product-global-search-container" >';
+
+		foreach ($fieldstosearchallText as $i => $langKey){
+			$fieldstosearchallText[$i] = $langs->trans($langKey);
+		}
+		$toolTip = $langs->trans('SearchWillBeOnTheseFields', '<br/>' . implode(', ' , $fieldstosearchallText));
+
+
 		$morehtmlcenter.= '<input name="sall" value="'.dol_htmlentities($sall).'" id="search-all-form-input" class="advanced-product-global-search-input" placeholder="'.$langs->trans('Search').'" autocomplete="off">';
+		$morehtmlcenter.= '<i title="'.dol_escape_htmltag($toolTip).'" class="fa fa-question-circle classfortooltip"></i>';
 		$morehtmlcenter.= '</div>';
 
 		$picto = 'product';
@@ -345,7 +356,7 @@ class AdvancedProductSearch extends CommonObject
 			$categoriesProductArr = $form->select_all_categories(Categorie::TYPE_PRODUCT, '', '', 64, 0, 1);
 			$categoriesProductArr[-2] = '- '.$langs->trans('NotCategorized').' -';
 			$moreforfilter .= Form::multiselectarray('search_category_product_list', $categoriesProductArr, $searchCategoryProductList, 0, 0, 'minwidth300');
-			$moreforfilter .= ' <input type="checkbox" class="valignmiddle" name="search_category_product_operator" value="1"'.($searchCategoryProductOperator == 1 ? ' checked="checked"' : '').'/> '.$langs->trans('UseOrOperatorForCategories');
+			$moreforfilter .= ' <label><input type="checkbox" class="valignmiddle" name="search_category_product_operator" value="1"'.($searchCategoryProductOperator == 1 ? ' checked="checked"' : '').'/> '.$langs->trans('UseOrOperatorForCategories').'</label>';
 			$moreforfilter .= '</div>';
 		}
 
