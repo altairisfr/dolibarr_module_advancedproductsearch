@@ -188,8 +188,8 @@ $( document ).ready(function() {
 					//document.location.reload(); // mis en commentaire pour eviter le re-post des data et action
 					let url = new URL(window.location.href);
 					let urlActionParam = url.searchParams.get("action"); // check actions
-					if(urlActionParam.length > 0){
-						AdvancedProductSearch.updateURLParameter(url, "action", ''); // on vide la partie action
+					if(urlActionParam != undefined && urlActionParam.length > 0){
+						window.location = AdvancedProductSearch.updateURLParameter(urlActionParam, "action", ''); // on vide la partie action
 					}
 					else{
 						window.location = window.location.href;
@@ -514,6 +514,13 @@ var AdvancedProductSearch = {};
 		});
 	}
 
+	/**
+	 *
+	 * @param url
+	 * @param param
+	 * @param paramVal
+	 * @returns {string}
+	 */
 	o.updateURLParameter = function updateURLParameter(url, param, paramVal)
 	{
 		var TheAnchor = null;
