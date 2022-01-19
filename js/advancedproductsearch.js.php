@@ -189,7 +189,7 @@ $( document ).ready(function() {
 					let url = new URL(window.location.href);
 					let urlActionParam = url.searchParams.get("action"); // check actions
 					if(urlActionParam != undefined && urlActionParam.length > 0){
-						window.location = AdvancedProductSearch.updateURLParameter(urlActionParam, "action", ''); // on vide la partie action
+						window.location = AdvancedProductSearch.updateURLParameter(window.location.href, "action", ''); // on vide la partie action
 					}
 					else{
 						window.location = window.location.href;
@@ -198,7 +198,6 @@ $( document ).ready(function() {
 			},
 			open: function( event, ui ) {
 				//$(this).dialog('option', 'maxHeight', $(window).height()-30);
-
 				AdvancedProductSearch.element = element;
 				AdvancedProductSearch.fk_element = fk_element;
 
@@ -516,9 +515,9 @@ var AdvancedProductSearch = {};
 
 	/**
 	 *
-	 * @param url
-	 * @param param
-	 * @param paramVal
+	 * @param {string} url
+	 * @param {string} param the get param
+	 * @param {string} paramVal the new value
 	 * @returns {string}
 	 */
 	o.updateURLParameter = function updateURLParameter(url, param, paramVal)
