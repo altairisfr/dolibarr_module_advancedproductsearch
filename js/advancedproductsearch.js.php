@@ -514,7 +514,7 @@ var AdvancedProductSearch = {};
 	}
 
 	/**
-	 *
+	 * Remplace la valeur d'un paramètre dans une URL
 	 * @param {string} url
 	 * @param {string} param the get param
 	 * @param {string} paramVal the new value
