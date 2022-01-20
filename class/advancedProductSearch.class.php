@@ -186,6 +186,8 @@ class AdvancedProductSearch extends CommonObject
 		//if ($seach_categ) $param.=($search_categ?"&search_categ=".urlencode($search_categ):"");
 		if ($type != '') $param .= '&type='.urlencode($type);
 		if ($search_type != '') $param .= '&search_type='.urlencode($search_type);
+		if ($element) $param .= '&element='.urlencode($element);
+		if ($fk_element) $param .= '&fk_element='.urlencode($fk_element);
 
 		// REQUETTE SQL
 
