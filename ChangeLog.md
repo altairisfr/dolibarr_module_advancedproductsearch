@@ -7,5 +7,6 @@
 - NEW : handle supplier documents - *08/12/2021* - 1.1.0
 
 ## 1.0
+- FIX : We can't add products or services after pop-in page change - *2022-01-20* - 1.0.2
 - FIX: signature for `addline` not consistent across objects (proposal, order, invoice) - *08/10/2021* - 1.0.1
 - Initial version
