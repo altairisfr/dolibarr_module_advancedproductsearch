@@ -185,12 +185,19 @@ $( document ).ready(function() {
 			close: function( event, ui ) {
 				if(AdvancedProductSearch.dialogCountAddedProduct>0){
 					// si une ligne a été ajoutée, recharge la page actuelle
-					document.location.reload();
+					//document.location.reload(); // mis en commentaire pour eviter le re-post des data et action
+					let url = new URL(window.location.href);
+					let urlActionParam = url.searchParams.get("action"); // check actions
+					if(urlActionParam != undefined && urlActionParam.length > 0){
+						window.location = AdvancedProductSearch.updateURLParameter(window.location.href, "action", ''); // on vide la partie action
+					}
+					else{
+						window.location = window.location.href;
+					}
 				}
 			},
 			open: function( event, ui ) {
 				//$(this).dialog('option', 'maxHeight', $(window).height()-30);
-
 				AdvancedProductSearch.element = element;
 				AdvancedProductSearch.fk_element = fk_element;
 
@@ -504,6 +511,58 @@ var AdvancedProductSearch = {};
 				o.disableAddProductFields(fk_product, false);
 			}
 		});
+	}
+
+	/**
+	 * Remplace la valeur d'un paramètre dans une URL
+	 * @param {string} url
+	 * @param {string} param the get param
+	 * @param {string} paramVal the new value
+	 * @returns {string}
+	 */
+	o.updateURLParameter = function updateURLParameter(url, param, paramVal)
+	{
+		var TheAnchor = null;
+		var newAdditionalURL = "";
+		var tempArray = url.split("?");
+		var baseURL = tempArray[0];
+		var additionalURL = tempArray[1];
+		var temp = "";
+
+		if (additionalURL)
+		{
+			var tmpAnchor = additionalURL.split("#");
+			var TheParams = tmpAnchor[0];
+			TheAnchor = tmpAnchor[1];
+			if(TheAnchor)
+				additionalURL = TheParams;
+
+			tempArray = additionalURL.split("&");
+
+			for (var i=0; i<tempArray.length; i++)
+			{
+				if(tempArray[i].split('=')[0] != param)
+				{
+					newAdditionalURL += temp + tempArray[i];
+					temp = "&";
+				}
+			}
+		}
+		else
+		{
+			var tmpAnchor = baseURL.split("#");
+			var TheParams = tmpAnchor[0];
+			TheAnchor  = tmpAnchor[1];
+
+			if(TheParams)
+				baseURL = TheParams;
+		}
+
+		if(TheAnchor)
+			paramVal += "#" + TheAnchor;
+
+		var rows_txt = temp + "" + param + "=" + paramVal;
+		return baseURL + "?" + newAdditionalURL + rows_txt;
 	}
 
 })(AdvancedProductSearch);
