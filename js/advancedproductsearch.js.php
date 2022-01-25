@@ -59,7 +59,7 @@ else header('Cache-Control: no-cache');
 // Load traductions files requiredby by page
 $langs->loadLangs(array("advancedproductsearch@advancedproductsearch","other"));
 
-$translateList = array('Saved', 'errorAjaxCall');
+$translateList = array('Saved', 'errorAjaxCall', 'SearchProduct', 'CloseDialog');
 
 $translate = array();
 foreach ($translateList as $key){
@@ -164,7 +164,7 @@ $( document ).ready(function() {
 
 		var productSearchDialogBox = "product-search-dialog-box";
 		// crée le calque qui sera convertie en popup
-		$('body').append('<div id="'+productSearchDialogBox+'" title="<?php print $langs->transnoentities('SearchProduct'); ?>"></div>');
+		$('body').append('<div id="'+productSearchDialogBox+'" title="' + AdvancedProductSearch.discountlang.SearchProduct + '"></div>');
 
 		// transforme le calque en popup
 		var popup = $('#'+productSearchDialogBox).dialog({
@@ -174,7 +174,7 @@ $( document ).ready(function() {
 			dialogClass: 'discountrule-product-search-box',
 			buttons: [
 				{
-					text: "<?php print $langs->transnoentities('CloseDialog'); ?>",
+					text: AdvancedProductSearch.discountlang.CloseDialog,
 					"class": 'ui-state-information',
 					click: function () {
 						$(this).dialog("close");
