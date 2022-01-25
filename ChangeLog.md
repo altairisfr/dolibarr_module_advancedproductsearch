@@ -1,5 +1,7 @@
 # CHANGELOG ADVANCEDPRODUCTSEARCH FOR [DOLIBARR ERP CRM](https://www.dolibarr.org)
 
+- FIX : css file doesn't need to be PHP file - *25/01/2022* - 1.2.0
+
 ## 1.1
 
 - FIX : Page reload prevent action param in url or post - *19/01/2021* - 1.1.3
