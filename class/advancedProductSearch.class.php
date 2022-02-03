@@ -945,7 +945,7 @@ class AdvancedProductSearch
 
 			// récupération du prix client
 			if ($societe) {
-				$TSellPrice = $product->getSellPrice($societe, $mysoc);
+				$TSellPrice = $product->getSellPrice($mysoc, $societe);
 				if (!empty($TSellPrice)) {
 					$baseSubprice = $TSellPrice['pu_ht'];
 				}
