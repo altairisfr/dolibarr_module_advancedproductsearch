@@ -421,7 +421,7 @@ if ($action === 'add-product') {
 }
 // retourne le formulaire de recherche avancé de produit
 elseif ($action === 'product-search-form') {
-	$AdvancedProductSearch = new AdvancedProductSearch($db);
+	$AdvancedProductSearch = new AdvancedProductSearch();
 	$element = GETPOST("element", 'aZ09');
 	$isSupplier = false;
 	if(in_array($element, $AdvancedProductSearch->supplierElements)) {

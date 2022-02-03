@@ -125,11 +125,52 @@ class ActionsAdvancedProductSearch {
 			// ADD DISCOUNT RULES SEARCH ON DOCUMENT ADD LINE FORM
 			print '<!-- MODULE advanced-product-search -->'."\r\n";
 			print '<button type="button" id="product-search-dialog-button" class="classfortooltip" data-target-element="'.$object->element.'" data-target-id="'.$object->id.'" title="'.$langs->trans("OpenSearchProductBox").'" ><i class="fa fa-search" ></i></button>';
+//			print '<script id="advance-product-search-script-load" src="'.dol_buildpath('advancedproductsearch/js/advancedproductsearch.js.php',1).'"></script>'; // le chargement complet doit être vérifié voir script plus bas
+			print '<link rel="stylesheet" type="text/css" href="'.dol_buildpath('advancedproductsearch/css/advancedproductsearch.css',1).'">';
+
+			// Load traductions files requiredby by page
+			$langs->loadLangs(array("advancedproductsearch@advancedproductsearch","other"));
+
+			$translateList = array('Saved', 'errorAjaxCall', 'SearchProduct', 'CloseDialog');
+
+			$translate = array();
+			foreach ($translateList as $key){
+				$translate[$key] = $langs->transnoentities($key);
+			}
+
+			// Ajout des configurations
+			include_once __DIR__ . '/advancedProductSearch.class.php';
+			$AdvancedProductSearch = new AdvancedProductSearch();
+
+			$confToJs = array(
+				'MAIN_MAX_DECIMALS_TOT' => $conf->global->MAIN_MAX_DECIMALS_TOT,
+				'MAIN_MAX_DECIMALS_UNIT' => $conf->global->MAIN_MAX_DECIMALS_UNIT,
+				'interface_url' => dol_buildpath('advancedproductsearch/scripts/interface.php',1),
+				'js_url' => dol_buildpath('advancedproductsearch/js/advancedproductsearch.js',1),
+				'supplierElements' => $AdvancedProductSearch->supplierElements
+			);
+
 			?>
+
 			<script type="text/javascript">
-				$(document).ready(function(){
+				jQuery(function ($) {
+					let config = <?php print json_encode($confToJs) ?>;
+
 					// ADD SEARCH BOX BUTTON
 					$( "#idprod,#idprodfournprice" ).parent().append($("#product-search-dialog-button"));
+
+					// Chargement de la librairie js
+					let advps_script_to_load = document.createElement('script')
+					advps_script_to_load.setAttribute('src', config.js_url);
+					advps_script_to_load.setAttribute('id', 'advance-product-search-script-load');
+					document.body.appendChild(advps_script_to_load);
+					// now wait for it to load...
+					advps_script_to_load.onload = () => {
+						// script has loaded, you can now use it safely
+						// Apply conf to AdvancedProductSearch object
+						AdvancedProductSearch.discountlang = <?php print json_encode($translate) ?>;
+						AdvancedProductSearch.config = config;
+					};
 				});
 			</script>
 			<!-- END MODULE advanced-product-search -->
