@@ -1,6 +1,8 @@
 # CHANGELOG ADVANCEDPRODUCTSEARCH FOR [DOLIBARR ERP CRM](https://www.dolibarr.org)
 
-- FIX : css and js files doesn't need to be PHP file - *25/01/2022* - 1.2.0
+
+- FIX : js file doesn't need to be PHP file - *03/02/2022* - 1.3.0
+- FIX : css file doesn't need to be PHP file - *25/01/2022* - 1.2.0
 
 ## 1.1
 
