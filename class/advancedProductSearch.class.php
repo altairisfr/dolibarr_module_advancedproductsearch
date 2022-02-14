@@ -3,11 +3,12 @@
 /**
  * Class for AdvancedProductSearch
  */
-class AdvancedProductSearch extends CommonObject
+class AdvancedProductSearch
 {
 
 	/**
 	 * @var string[]
+	 * note : if you change this items, change also advancedproductsearch.js supplierElements var
 	 */
 	public $supplierElements =  array(
 		'supplier_proposal',

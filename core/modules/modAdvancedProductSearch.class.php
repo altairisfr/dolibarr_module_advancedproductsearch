@@ -72,7 +72,7 @@ class modAdvancedProductSearch extends DolibarrModules
 		$this->editor_url = 'https://www.atm-consulting.fr';
 
 		// Possible values for version are: 'development', 'experimental', 'dolibarr', 'dolibarr_deprecated' or a version string like 'x.y.z'
-		$this->version = '1.2.1';
+		$this->version = '1.3.0';
 		// Url to the file with your last numberversion of this module
 		//$this->url_last_version = 'http://www.example.com/versionmodule.txt';
 
@@ -107,11 +107,11 @@ class modAdvancedProductSearch extends DolibarrModules
 			'theme' => 0,
 			// Set this to relative path of css file if module has its own css file
 			'css' => array(
-				'/advancedproductsearch/css/advancedproductsearch.css',
+//				'/advancedproductsearch/css/advancedproductsearch.css', // fichier maintenant chargé au cas par cas avec les hooks car sinon est chargé sur toutes les pages (dont les publiques)
 			),
 			// Set this to relative path of js file if module must load a js on all pages
 			'js' => array(
-				'/advancedproductsearch/js/advancedproductsearch.js.php',
+//				'/advancedproductsearch/js/advancedproductsearch.js.php', // fichier maintenant chargé au cas par cas avec les hooks car sinon est chargé sur toutes les pages (dont les publiques)
 			),
 			// Set here all hooks context managed by module. To find available hook context, make a "grep -r '>initHooks(' *" on source code. You can also set hook context to 'all'
 			'hooks' => array(
