@@ -58,6 +58,7 @@ if ($action === 'add-product') {
 	$jsonResponse = new stdClass();
 	$jsonResponse->result = false;
 	$jsonResponse->msg = '';
+	$jsonResponse->newToken = newToken();
 
 	$fk_product = GETPOST('fk_product', 'int');
 	$element = GETPOST("element", 'aZ09');

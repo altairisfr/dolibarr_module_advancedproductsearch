@@ -6,6 +6,7 @@
 
 
 ## 1.3
+- FIX : Token transfert in js - *24/03/2022* - 1.3.1
 - FIX : js file doesn't need to be PHP file - *03/02/2022* - 1.3.0
 - FIX : css file doesn't need to be PHP file - *25/01/2022* - 1.2.0
 

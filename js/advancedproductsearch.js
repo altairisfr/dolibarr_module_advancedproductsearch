@@ -171,6 +171,9 @@ AdvancedProductSearch = {};
 
 	o.lastidprod = 0;
 	o.lastqty = 0;
+	o.newToken = '';
+
+	o.productSearchDialogBox = "product-search-dialog-box";
 
 	// lang par défaut, les valeurs son ecrasées lors du chargement de la page en fonction de la langue
 	o.discountlang = {
@@ -205,26 +208,35 @@ AdvancedProductSearch = {};
 	 * @param $morefilters
 	 */
 	o.discountLoadSearchProductDialogForm = function (morefilters = ''){
-		var productSearchDialogBox = "product-search-dialog-box";
 
-		$('#'+productSearchDialogBox).addClass('--ajax-loading');
+		$('#'+o.productSearchDialogBox).addClass('--ajax-loading');
 
-		$('#'+productSearchDialogBox).prepend($('<div class="inner-dialog-overlay"><div class="dialog-loading__loading"><div class="dialog-loading__spinner-wrapper"><span class="dialog-loading__spinner-text">LOADING</span><span class="dialog-loading__spinner"></span></div></div></div>'));
+		$('#'+o.productSearchDialogBox).prepend($('<div class="inner-dialog-overlay"><div class="dialog-loading__loading"><div class="dialog-loading__spinner-wrapper"><span class="dialog-loading__spinner-text">LOADING</span><span class="dialog-loading__spinner"></span></div></div></div>'));
 
-		$('#'+productSearchDialogBox).load( o.config.interface_url + '?action=product-search-form' + morefilters, function() {
+		$('#'+o.productSearchDialogBox).load( o.config.interface_url + '?action=product-search-form' + morefilters, function() {
 			o.dialogCountAddedProduct = 0; // init count of product added for reload action
 			o.focusAtEndSearchInput($("#search-all-form-input"));
+			o.GetNewToken();
 
-			if($('#'+productSearchDialogBox).outerHeight() >= $( window ).height()-150 ){
-				$('#'+productSearchDialogBox).dialog( "option", "position", { my: "top", at: "top", of: window } ); // Hack to position the dialog box after ajax load
+			if($('#'+o.productSearchDialogBox).outerHeight() >= $( window ).height()-150 ){
+				$('#'+o.productSearchDialogBox).dialog( "option", "position", { my: "top", at: "top", of: window } ); // Hack to position the dialog box after ajax load
 			}
 			else{
-				$('#'+productSearchDialogBox).dialog( "option", "position", { my: "center", at: "center", of: window } ); // Hack to center vertical the dialog box after ajax load
+				$('#'+o.productSearchDialogBox).dialog( "option", "position", { my: "center", at: "center", of: window } ); // Hack to center vertical the dialog box after ajax load
 			}
 
-			o.initToolTip($('#'+productSearchDialogBox+' .classfortooltip')); // restore tooltip after ajax call
-			$('#'+productSearchDialogBox).removeClass('--ajax-loading');
+			o.initToolTip($('#'+o.productSearchDialogBox+' .classfortooltip')); // restore tooltip after ajax call
+			$('#'+o.productSearchDialogBox).removeClass('--ajax-loading');
 		});
+	}
+
+	/**
+	 * Get new token
+	 */
+	o.GetNewToken = function (){
+		if($('#'+o.productSearchDialogBox + ' input[name=token]').length > 0){
+			o.newToken = $('#'+o.productSearchDialogBox + ' input[name=token]').val();
+		}
 	}
 
 
@@ -402,6 +414,8 @@ AdvancedProductSearch = {};
 
 		o.initCurrentDocumentObjectVarsFromForm();
 
+		o.GetNewToken();
+
 		var sendData = {
 			'action': "add-product",
 			'fk_product': fk_product,
@@ -409,7 +423,8 @@ AdvancedProductSearch = {};
 			'subprice': $("#advanced-product-search-list-input-subprice-"+fk_product).val(),
 			'reduction': $("#advanced-product-search-list-input-reduction-"+fk_product).val(),
 			'fk_element': o.fk_element,
-			'element': o.element
+			'element': o.element,
+			'token': o.newToken
 		};
 
 		// check if supplier price exist because it could be not activated
@@ -430,7 +445,7 @@ AdvancedProductSearch = {};
 				else {
 					// do stuff on error
 				}
-
+				o.newToken = data.newToken;
 				o.dialogCountAddedProduct++; // indique qu'il faudra un rechargement de page à la fermeture de la dialogbox
 				o.focusAtEndSearchInput($("#search-all-form-input")); // on replace le focus sur la recherche global pour augmenter la productivité
 				o.setEventMessage(data.msg, data.result);
