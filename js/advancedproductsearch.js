@@ -40,14 +40,17 @@ jQuery(function ($) {
 		// limité au côté fournisseur
 		if(AdvancedProductSearch.isSupplierDocument()){
 			let fk_product = $(this).attr("data-product");
+			let fourn_qty = $(this).find(':selected').data('fourn_qty');
+			let fourn_qty_field = $("#advanced-product-search-list-input-qty-" + fk_product);
+
 			$("#advanced-product-search-list-input-subprice-" + fk_product).val($(this).find(':selected').data('up'));
-			if ($(this).find(':selected').data('fourn_qty') != undefined) {
-				if ($(this).find(':selected').data('fourn_qty') > $("#advanced-product-search-list-input-qty-" + fk_product).val()) {
-					$("#advanced-product-search-list-input-qty-" + fk_product).val($(this).find(':selected').data('fourn_qty'));
+			if (fourn_qty != undefined) {
+				if (fourn_qty > fourn_qty_field.val()) {
+					fourn_qty_field.val($(this).find(':selected').data('fourn_qty'));
 				}
-				$("#advanced-product-search-list-input-qty-" + fk_product).attr('min', $(this).find(':selected').data('fourn_qty'));
+				fourn_qty_field.attr('min', $(this).find(':selected').data('fourn_qty'));
 			} else {
-				$("#advanced-product-search-list-input-qty-" + fk_product).attr('min', 0);
+				fourn_qty_field.attr('min', 0);
 			}
 			$("#advanced-product-search-list-input-subprice-" + fk_product).trigger('change');
 		}
