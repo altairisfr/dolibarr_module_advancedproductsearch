@@ -543,9 +543,10 @@ class AdvancedProductSearch
 
 								foreach ($TFournPriceList as $TpriceInfos) {
 									$selectArray[$TpriceInfos['id']] = array(
-																				'label'=>$TpriceInfos['label'],
-																				'data-up'=>$TpriceInfos['price']
-																			);
+										'label'=>$TpriceInfos['label'],
+										'data-up'=>$TpriceInfos['price'],
+										'data-fourn_qty'=>$TpriceInfos['fourn_qty']
+										);
 									if ($TpriceInfos['id'] == 'pmpprice' && !empty($TpriceInfos['price'])) {
 										$idSelected = 'pmpprice';
 									}
@@ -907,7 +908,14 @@ class AdvancedProductSearch
 					$label = price($price, 0, $langs, 0, 0, -1, $conf->currency)."/".$langs->trans("Unit");
 					if ($productSupplier->fourn_ref) $label .= ' ('.$productSupplier->fourn_ref.')';
 
-					$prices[] = array("id" => $productSupplier->product_fourn_price_id, "price" => price2num($price, 0, '', 0), "label" => $label, "title" => $title, 'ref' => $productSupplier->fourn_ref); // For price field, we must use price2num(), for label or title, price()
+					$prices[] = array(
+						"id" => $productSupplier->product_fourn_price_id,
+						"price" => price2num($price, 0, '', 0),
+						"label" => $label,
+						"title" => $title,
+						'ref' => $productSupplier->fourn_ref,
+						'fourn_qty' => $productSupplier->fourn_qty
+					); // For price field, we must use price2num(), for label or title, price()
 				}
 			}
 
@@ -916,12 +924,24 @@ class AdvancedProductSearch
 			{
 				// Add price for pmp
 				$price = $producttmp->pmp;
-				$prices[] = array("id" => 'pmpprice', "price" => price2num($price), "label" => $langs->trans("PMPValueShort").': '.price($price, 0, $langs, 0, 0, -1, $conf->currency), "title" => $langs->trans("PMPValueShort").': '.price($price, 0, $langs, 0, 0, -1, $conf->currency)); // For price field, we must use price2num(), for label or title, price()
+				$prices[] = array(
+					"id" => 'pmpprice',
+					"price" => price2num($price),
+					"label" => $langs->trans("PMPValueShort").': '.price($price, 0, $langs, 0, 0, -1, $conf->currency),
+					"title" => $langs->trans("PMPValueShort").': '.price($price, 0, $langs, 0, 0, -1, $conf->currency),
+					'fourn_qty' => 0
+				); // For price field, we must use price2num(), for label or title, price()
 			}
 
 			// Add price for costprice (at end)
 			$price = $producttmp->cost_price;
-			$prices[] = array("id" => 'costprice', "price" => price2num($price), "label" => $langs->trans("CostPrice").': '.price($price, 0, $langs, 0, 0, -1, $conf->currency), "title" => $langs->trans("PMPValueShort").': '.price($price, 0, $langs, 0, 0, -1, $conf->currency)); // For price field, we must use price2num(), for label or title, price()
+			$prices[] = array(
+				"id" => 'costprice',
+				"price" => price2num($price),
+				"label" => $langs->trans("CostPrice").': '.price($price, 0, $langs, 0, 0, -1, $conf->currency),
+				"title" => $langs->trans("PMPValueShort").': '.price($price, 0, $langs, 0, 0, -1, $conf->currency),
+				'fourn_qty' => 0
+			); // For price field, we must use price2num(), for label or title, price()
 		}
 
 		return $prices;

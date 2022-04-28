@@ -41,6 +41,14 @@ jQuery(function ($) {
 		if(AdvancedProductSearch.isSupplierDocument()){
 			let fk_product = $(this).attr("data-product");
 			$("#advanced-product-search-list-input-subprice-" + fk_product).val($(this).find(':selected').data('up'));
+			if ($(this).find(':selected').data('fourn_qty') != undefined) {
+				if ($(this).find(':selected').data('fourn_qty') > $("#advanced-product-search-list-input-qty-" + fk_product).val()) {
+					$("#advanced-product-search-list-input-qty-" + fk_product).val($(this).find(':selected').data('fourn_qty'));
+				}
+				$("#advanced-product-search-list-input-qty-" + fk_product).attr('min', $(this).find(':selected').data('fourn_qty'));
+			} else {
+				$("#advanced-product-search-list-input-qty-" + fk_product).attr('min', 0);
+			}
 			$("#advanced-product-search-list-input-subprice-" + fk_product).trigger('change');
 		}
 	});
