@@ -563,7 +563,7 @@ class AdvancedProductSearch
 											$finalSubprice = $subprice - $subprice*$reduction/100;
 										}
 										// On insère une valeur vide, car si plusieurs prix fourn, on laisse le choix à l'utilisateur de sélectionner celui qu'il souhaite
-										$selectArray[0] = array('data-up' => 0);
+										$selectArray[0] = array('data-up' => 0, 'data-fourn_qty' => 0);
 									}
 								}
 
@@ -608,7 +608,20 @@ class AdvancedProductSearch
 						// QTY
 						$output.= '<td class="advanced-product-search-col --qty" >';
 						$qty = 1;
-						$output.= '<input id="advanced-product-search-list-input-qty-'.$product->id.'"  data-product="'.$product->id.'"  class="advanced-product-search-list-input-qty center on-update-calc-prices" type="number" step="any" min="0" maxlength="8" size="3" value="'.$qty.'" placeholder="x" name="prodqty['.$product->id.']" />';
+						$qtyMin = 0;
+
+						if (!empty($selectArray)) {
+							$currentlySelectedFournPrice = reset($selectArray);
+							if (!empty($currentlySelectedFournPrice['data-fourn_qty'])) {
+								$qtyMin = doubleval($currentlySelectedFournPrice['data-fourn_qty']);
+							}
+						}
+						// Si le quantity est affecter par un autre élément, plus tard.
+						if ($qtyMin > $qty) {
+							$qty = $qtyMin;
+						}
+
+						$output.= '<input id="advanced-product-search-list-input-qty-'.$product->id.'"  data-product="'.$product->id.'"  class="advanced-product-search-list-input-qty center on-update-calc-prices" type="number" step="any" min="'.$qtyMin.'" maxlength="8" size="3" value="'.$qty.'" placeholder="x" name="prodqty['.$product->id.']" />';
 						$output.= '</td>';
 
 						// UNITE
