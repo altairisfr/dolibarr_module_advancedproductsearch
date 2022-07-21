@@ -94,6 +94,8 @@ class AdvancedProductSearch
 	public static function advancedProductSearchForm($pageUrl = '', $isSupplier = false) {
 		global $langs, $conf, $db, $action;
 
+		$newToken = function_exists('newToken') ? newToken() : $_SESSION['newtoken'];
+
 		$output = '';
 
 		if(empty($pageUrl)){
@@ -276,9 +278,10 @@ class AdvancedProductSearch
 
 		$output.=  '<form id="product-search-dialog-form" class="--blur-on-loading" >';
 
-		$output.=  '<input type="hidden" name="token" value="'.newToken().'">';
+		$output.=  '<input type="hidden" name="token" value="'.$newToken.'">';
 		$output.=  '<input type="hidden" name="formfilteraction" id="formfilteraction" value="list">';
 		$output.= '<input type="hidden" name="action" value="product-search-form">';
+		$output.= '<input type="hidden" name="token" value="'.$newToken.'">';
 		$output.= '<input type="hidden" name="sortfield" value="'.$sortfield.'">';
 		$output.= '<input type="hidden" name="sortorder" value="'.$sortorder.'">';
 		//$output.= '<input type="hidden" name="page" value="'.$page.'">';
