@@ -6,6 +6,7 @@
 
 
 ## 1.3
+- FIX : PHP 8 - *08/08/2022* - 1.3.4
 - FIX : Compatibilité V16 - *13/06/2022* - 1.3.3
 - FIX: Minimum quantity apply - *29/04/2022* - 1.3.2
 - FIX : Token transfert in js - *24/03/2022* - 1.3.1
