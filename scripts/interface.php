@@ -428,7 +428,8 @@ elseif ($action === 'product-search-form') {
 	if(in_array($element, $AdvancedProductSearch->supplierElements)) {
 		$isSupplier = true;
 	}
-	print AdvancedProductSearch::advancedProductSearchForm('', $isSupplier);
+	$AdvancedProductSearch->getSearchParamFromPost();
+	print $AdvancedProductSearch->advancedProductSearchForm($isSupplier);
 }
 
 
