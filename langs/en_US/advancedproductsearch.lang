@@ -36,3 +36,34 @@ AdvancedProductSearchSetupPage = Options de configuration de la recherche avanc�
 About = About
 AdvancedProductSearchAbout = A propos
 AdvancedProductSearchAboutPage = A propos du module de recherche avancée de produits
+
+#
+# MISSING TRANSLATION FROM fr_FR
+#
+AdvancedProductSearch=Recherche de produits/services avancée
+AdvanceProductSearch=Recherche avancée
+resultsDisplayForNbResultsFounds=%s enregistrements affichés sur %s enregistrements trouvés
+OneResultDisplayForOneResultFounds=%s enregistrement affiché sur %s enregistrement trouvé
+SearchProduct=Recherche de produits/services
+ClickToAddProductInDocument=Ajouter ce produit/service au document
+OpenSearchProductBox=Recherche avancée
+ErrorFetchingObject=Erreur : Document non trouvé
+ErrorFetchingProduct=Erreur : Produit non trouvé
+ErrorOnAddLine=Erreur lors de l'ajout de ligne
+LineAdded=ligne ajoutée
+DocumentNotAvailable=Document non disponible
+BuyPrice=Prix d'achat
+CloseDialog=Fermer
+FinalDiscountSubPrice=Prix unitaire remisé
+FournPriceError=Erreur sur le prix fournisseur
+ErrrorRemiseMustBeAValidPercent=Erreur : la remise doit être une valeur comprise entre 0 et 100
+SearchRef=Référence recherchée
+SearchLabel=Libellé recherché
+NotEnoughRights=Cette action ne vous est pas authorisée
+ErrorMissingModuleDiscountRule=Erreur : le module règle de remise est installé mais semble supprimé
+FinalDiscountPrice=Prix final
+PredefinedFournPricesForFill=Prix d'achat prédéfinis
+PredefinedFournPricesForFillHelp=Sélectionnez un tarif dans la liste pour remplir automatiquement la colonne "Prix"
+ProductCategories=Tags/catégories produits
+SearchWillBeOnTheseFields=La recherche globale s'effectue sur les champs suivants : %s
+ProductRefFourn=Référence fournisseur

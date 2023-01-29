@@ -578,6 +578,7 @@ class AdvancedProductSearch
 								$maxlen = 0;
 								$disabled = 0;
 								if($isSupplier) $sort = 'ASC';
+								else $sort = 'DESC';
 								$morecss = 'search-list-select';
 								$addjscombo = 0;
 								if(!empty($selectArray)) {
@@ -1017,7 +1018,7 @@ class AdvancedProductSearch
 		return preg_replace("/($needle)/iu", sprintf('<span style="background-color: %s; color:%s;">$1</span>', $backgroundColor, $color), $haystack);
 	}
 
-	public function highlightWordsOfSearchQuery( $content, $searchQuery) {
+	public static function highlightWordsOfSearchQuery( $content, $searchQuery) {
 
 		$words = explode(' ', $searchQuery);
 		$words = array_unique($words);
