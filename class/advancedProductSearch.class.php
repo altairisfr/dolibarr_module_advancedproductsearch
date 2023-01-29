@@ -312,40 +312,40 @@ class AdvancedProductSearch
 		}
 
 		// SELECT PART
-		$this->searchqlSelect = ' DISTINCT p.rowid, p.ref, p.label ';
-		if (!empty($conf->global->PRODUCT_USE_UNITS))   $this->searchqlSelect .= ' ,cu.label as cu_label';
+		$this->searchSqlSelect = ' DISTINCT p.rowid, p.ref, p.label ';
+		if (!empty($conf->global->PRODUCT_USE_UNITS))   $this->searchSqlSelect .= ' ,cu.label as cu_label';
 
 		// SELECT COUNT PART
-		$this->searchqlSelectCount = ' COUNT(DISTINCT p.rowid) as nb_results ';
+		$this->searchSqlSelectCount = ' COUNT(DISTINCT p.rowid) as nb_results ';
 
-		$this->searchql = ' FROM '.MAIN_DB_PREFIX.'product as p ';
-		if (!empty($this->search['searchCategoryProductList']) || !empty($this->search['catid'])) $this->searchql .= ' LEFT JOIN '.MAIN_DB_PREFIX."categorie_product as cp ON (p.rowid = cp.fk_product) "; // We'll need this table joined to the select in order to filter by categ
-		$this->searchql .= " LEFT JOIN ".MAIN_DB_PREFIX."product_fournisseur_price as pfp ON (pfp.fk_product = p.rowid) ";
+		$this->searchSql = ' FROM '.MAIN_DB_PREFIX.'product as p ';
+		if (!empty($this->search['searchCategoryProductList']) || !empty($this->search['catid'])) $this->searchSql .= ' LEFT JOIN '.MAIN_DB_PREFIX."categorie_product as cp ON (p.rowid = cp.fk_product) "; // We'll need this table joined to the select in order to filter by categ
+		$this->searchSql .= " LEFT JOIN ".MAIN_DB_PREFIX."product_fournisseur_price as pfp ON (pfp.fk_product = p.rowid) ";
 		// multilang
-		if (!empty($conf->global->MAIN_MULTILANGS)) $this->searchql .= " LEFT JOIN ".MAIN_DB_PREFIX."product_lang as pl ON (pl.fk_product = p.rowid AND pl.lang = '".$langs->getDefaultLang()."' )";
-		if (!empty($conf->global->PRODUCT_USE_UNITS))   $this->searchql .= " LEFT JOIN ".MAIN_DB_PREFIX."c_units cu ON (cu.rowid = p.fk_unit)";
+		if (!empty($conf->global->MAIN_MULTILANGS)) $this->searchSql .= " LEFT JOIN ".MAIN_DB_PREFIX."product_lang as pl ON (pl.fk_product = p.rowid AND pl.lang = '".$langs->getDefaultLang()."' )";
+		if (!empty($conf->global->PRODUCT_USE_UNITS))   $this->searchSql .= " LEFT JOIN ".MAIN_DB_PREFIX."c_units cu ON (cu.rowid = p.fk_unit)";
 
-		$this->searchql .= ' WHERE p.entity IN ('.getEntity('product').')';
-		if (isset($this->search['search_tosell']) && dol_strlen($this->search['search_tosell']) > 0 && $this->search['search_tosell'] != -1) $this->searchql .= " AND p.tosell = ".((int) $this->search['search_tosell']);
-		if (isset($this->search['search_tobuy']) && dol_strlen($this->search['search_tobuy']) > 0 && $this->search['search_tobuy'] != -1)   $this->searchql .= " AND p.tobuy = ".((int) $this->search['search_tobuy']);
+		$this->searchSql .= ' WHERE p.entity IN ('.getEntity('product').')';
+		if (isset($this->search['search_tosell']) && dol_strlen($this->search['search_tosell']) > 0 && $this->search['search_tosell'] != -1) $this->searchSql .= " AND p.tosell = ".((int) $this->search['search_tosell']);
+		if (isset($this->search['search_tobuy']) && dol_strlen($this->search['search_tobuy']) > 0 && $this->search['search_tobuy'] != -1)   $this->searchSql .= " AND p.tobuy = ".((int) $this->search['search_tobuy']);
 
-		if ($this->search['sall']) $this->searchql .= natural_search($fieldstosearchall, $this->search['sall']);
+		if ($this->search['sall']) $this->searchSql .= natural_search($fieldstosearchall, $this->search['sall']);
 		// if the type is not 1, we show all products (type = 0,2,3)
 //	if (dol_strlen($this->search['search_type']) && $this->search['search_type'] != '-1'){
-//		if ($this->search['search_type'] == 1) $this->searchql .= " AND p.fk_product_type = 1";
-//		else $this->searchql .= " AND p.fk_product_type <> 1";
+//		if ($this->search['search_type'] == 1) $this->searchSql .= " AND p.fk_product_type = 1";
+//		else $this->searchSql .= " AND p.fk_product_type <> 1";
 //	}
 
-		if ($this->search['search_ref'])     $this->searchql .= natural_search('p.ref', $this->search['search_ref']);
-		if ($this->search['search_label'])   $this->searchql .= natural_search('p.label', $this->search['search_label']);
-		if ($this->search['search_barcode']) $this->searchql .= natural_search('p.barcode', $this->search['search_barcode']);
+		if ($this->search['search_ref'])     $this->searchSql .= natural_search('p.ref', $this->search['search_ref']);
+		if ($this->search['search_label'])   $this->searchSql .= natural_search('p.label', $this->search['search_label']);
+		if ($this->search['search_barcode']) $this->searchSql .= natural_search('p.barcode', $this->search['search_barcode']);
 		// Filter on supplier
 		if (!empty($conf->fournisseur->enabled) && !empty($this->search['search_supplierref'])){
-			$this->searchql .= natural_search('pfp.ref_fourn', $this->search['search_supplierref']);
+			$this->searchSql .= natural_search('pfp.ref_fourn', $this->search['search_supplierref']);
 		}
 
-		if ($this->search['catid'] > 0)     $this->searchql .= " AND cp.fk_categorie = ".$this->search['catid'];
-		if ($this->search['catid'] == -2)   $this->searchql .= " AND cp.fk_categorie IS NULL";
+		if ($this->search['catid'] > 0)     $this->searchSql .= " AND cp.fk_categorie = ".$this->search['catid'];
+		if ($this->search['catid'] == -2)   $this->searchSql .= " AND cp.fk_categorie IS NULL";
 
 		$this->searchearchCategoryProductSqlList = array();
 		if ($this->search['searchCategoryProductOperator'] == 1) {
@@ -357,7 +357,7 @@ class AdvancedProductSearch
 				}
 			}
 			if (!empty($this->searchearchCategoryProductSqlList)) {
-				$this->searchql .= " AND (".implode(' OR ', $this->searchearchCategoryProductSqlList).")";
+				$this->searchSql .= " AND (".implode(' OR ', $this->searchearchCategoryProductSqlList).")";
 			}
 		} else {
 			foreach ($this->search['searchCategoryProductList'] as $this->searchearchCategoryProduct) {
@@ -368,10 +368,10 @@ class AdvancedProductSearch
 				}
 			}
 			if (!empty($this->searchearchCategoryProductSqlList)) {
-				$this->searchql .= " AND (".implode(' AND ', $this->searchearchCategoryProductSqlList).")";
+				$this->searchSql .= " AND (".implode(' AND ', $this->searchearchCategoryProductSqlList).")";
 			}
 		}
-		if ($this->search['fourn_id'] > 0)  $this->searchql .= " AND pfp.fk_soc = ".((int) $this->search['fourn_id']);
+		if ($this->search['fourn_id'] > 0)  $this->searchSql .= " AND pfp.fk_soc = ".((int) $this->search['fourn_id']);
 
 		$output.= '<form id="product-search-dialog-form" class="--blur-on-loading" >';
 
@@ -389,14 +389,14 @@ class AdvancedProductSearch
 		$output.= '<input type="hidden" id="advancedproductsearch-form-fk-project" name="fk_project" value="'.$this->search['fk_project'].'">';
 		$output.= '<input type="hidden" id="advancedproductsearch-form-default-customer-reduction" name="default_customer_reduction" value="'.floatval($object->thirdparty->remise_percent).'">';
 
-		$querySearchRes = $db->query('SELECT '.$this->searchqlSelectCount.' '.$this->searchql);
+		$querySearchRes = $db->query('SELECT '.$this->searchSqlSelectCount.' '.$this->searchSql);
 		$globalCountResult = 0;
 		$curentCountResult = 0;
 		if ($querySearchRes) {
 			$obj = $db->fetch_object($querySearchRes);
 			$globalCountResult = $obj->nb_results;
 
-			$querySearchRes = $db->query('SELECT '.$this->searchqlSelect.' '.$this->searchql.$db->plimit($this->search['limit'] + 1, $this->search['offset']));
+			$querySearchRes = $db->query('SELECT '.$this->searchSqlSelect.' '.$this->searchSql.$db->plimit($this->search['limit'] + 1, $this->search['offset']));
 			if ($querySearchRes) {
 				$curentCountResult = $db->num_rows($querySearchRes);
 			}
@@ -568,11 +568,11 @@ class AdvancedProductSearch
 		$output.= '</thead>';
 		$output.= '<tbody>';
 
-		$this->searchqlList = 'SELECT '.$this->searchqlSelect.' '
-			.$this->searchql.$db->order($this->search['sortfield'], $this->search['sortorder'])
+		$this->searchSqlList = 'SELECT '.$this->searchSqlSelect.' '
+			.$this->searchSql.$db->order($this->search['sortfield'], $this->search['sortorder'])
 			.$db->plimit($this->search['limit'] + 1, $this->search['offset']);
 
-		$querySearchRes = $db->query($this->searchqlList);
+		$querySearchRes = $db->query($this->searchSqlList);
 
 		if ($querySearchRes)
 		{
