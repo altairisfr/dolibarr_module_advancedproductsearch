@@ -124,7 +124,7 @@ jQuery(function ($) {
 				AdvancedProductSearch.element = element;
 				AdvancedProductSearch.fk_element = fk_element;
 
-				AdvancedProductSearch.discountLoadSearchProductDialogForm("&element="+element+"&fk_element="+fk_element);
+				AdvancedProductSearch.discountLoadSearchProductDialogForm("&element="+element+"&fk_element="+fk_element+"&displayResults=0");
 				$('#'+productSearchDialogBox).parent().css('z-index', 1002);
 				$('.ui-widget-overlay').css('z-index', 1001);
 			}

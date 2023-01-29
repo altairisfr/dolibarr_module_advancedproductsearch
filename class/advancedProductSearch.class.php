@@ -6,6 +6,11 @@
 class AdvancedProductSearch
 {
 
+
+	public $displayResults = true; // TODO ajouter une valeur par défaut en conf
+
+	public $searchSelectArray;
+
 	/**
 	 * @var string[]
 	 * note : if you change this items, change also advancedproductsearch.js supplierElements var
@@ -31,9 +36,6 @@ class AdvancedProductSearch
 		'page' => 0,
 		'offset' => 0,
 
-		'sortfield' => '',
-		'sortorder' => '',
-
 		// LES FILTRES
 		'search_type' => -1,
 		'sall' => '',
@@ -41,7 +43,6 @@ class AdvancedProductSearch
 		'search_supplierref' => '',
 		'search_barcode' => '',
 		'search_label' => '',
-		'search_type' => '',
 		//	'search_vatrate'
 		'searchCategoryProductOperator' => 0,
 		'searchCategoryProductList' => '',
@@ -61,8 +62,10 @@ class AdvancedProductSearch
 	);
 
 
-
-	public function _construct(){
+	/**
+	 *
+	 */
+	public function __construct(){
 
 		$this->setSearchParamDefaultValues();
 	}
@@ -247,7 +250,6 @@ class AdvancedProductSearch
 
 	/**
 	 * return an ajax ready search table for product
-	 * @param string $this->search['pageUrl'] Page URL (in most cases provided with $_SERVER["PHP_SELF"])
 	 * @param bool $isSupplier
 	 * @return string
 	 */
@@ -389,16 +391,20 @@ class AdvancedProductSearch
 		$output.= '<input type="hidden" id="advancedproductsearch-form-fk-project" name="fk_project" value="'.$this->search['fk_project'].'">';
 		$output.= '<input type="hidden" id="advancedproductsearch-form-default-customer-reduction" name="default_customer_reduction" value="'.floatval($object->thirdparty->remise_percent).'">';
 
-		$querySearchRes = $db->query('SELECT '.$this->searchSqlSelectCount.' '.$this->searchSql);
 		$globalCountResult = 0;
 		$curentCountResult = 0;
-		if ($querySearchRes) {
-			$obj = $db->fetch_object($querySearchRes);
-			$globalCountResult = $obj->nb_results;
 
-			$querySearchRes = $db->query('SELECT '.$this->searchSqlSelect.' '.$this->searchSql.$db->plimit($this->search['limit'] + 1, $this->search['offset']));
+
+		if($this->displayResults) {
+			$querySearchRes = $db->query('SELECT ' . $this->searchSqlSelectCount . ' ' . $this->searchSql);
 			if ($querySearchRes) {
-				$curentCountResult = $db->num_rows($querySearchRes);
+				$obj = $db->fetch_object($querySearchRes);
+				$globalCountResult = $obj->nb_results;
+
+				$querySearchRes = $db->query('SELECT ' . $this->searchSqlSelect . ' ' . $this->searchSql . $db->plimit($this->search['limit'] + 1, $this->search['offset']));
+				if ($querySearchRes) {
+					$curentCountResult = $db->num_rows($querySearchRes);
+				}
 			}
 		}
 
@@ -572,199 +578,202 @@ class AdvancedProductSearch
 			.$this->searchSql.$db->order($this->search['sortfield'], $this->search['sortorder'])
 			.$db->plimit($this->search['limit'] + 1, $this->search['offset']);
 
-		$querySearchRes = $db->query($this->searchSqlList);
+		if($this->displayResults) {
 
-		if ($querySearchRes)
-		{
-			if($curentCountResult > 0){
-				while ($obj = $db->fetch_object($querySearchRes)){
-					$product = new Product($db);
-					$resProd = $product->fetch($obj->rowid);
-					if($resProd > 0){
-						$product->load_stock();
+			$querySearchRes = $db->query($this->searchSqlList);
 
-						// Réduction par défaut du client
-						$reduction = doubleval($object->thirdparty->remise_percent);
-						if($isSupplier) {
-							$reduction = doubleval($object->thirdparty->remise_supplier_percent);
-						}
+			if ($querySearchRes) {
+				if ($curentCountResult > 0) {
+					while ($obj = $db->fetch_object($querySearchRes)) {
+						$product = new Product($db);
+						$resProd = $product->fetch($obj->rowid);
+						if ($resProd > 0) {
+							$product->load_stock();
 
-						// Prix unitaire du produit avec prise en compte des niveau de prix et du client
-						$this->searchubprice = self::getProductSellPrice($product->id, $this->search['fk_company']);
-						if($isSupplier) {
-							$this->searchubprice = 0;
-						}
+							// Réduction par défaut du client
+							$reduction = doubleval($object->thirdparty->remise_percent);
+							if ($isSupplier) {
+								$reduction = doubleval($object->thirdparty->remise_supplier_percent);
+							}
 
-						// calcule du prix unitaire final apres réduction
-						$finalSubprice = $this->searchubprice - $this->searchubprice*$reduction/100;
+							// Prix unitaire du produit avec prise en compte des niveau de prix et du client
+							$this->searchubprice = self::getProductSellPrice($product->id, $this->search['fk_company']);
+							if ($isSupplier) {
+								$this->searchubprice = 0;
+							}
 
-						// COMPTATIBILITE MODULE DISCOUNT RULE : RECHERCHE DE REGLE DE TARIFICATION
-						if (!empty($conf->discountrules->enabled) && !$isSupplier){
-							if(!class_exists('DiscountSearch')){ dol_include_once('/discountrules/class/discountSearch.class.php'); }
-							if(class_exists('DiscountSearch')) { // Il est possible que le module soit supprimé mais pas désinstallé
-								$discountSearch = new DiscountSearch($db);
-								$this->searchubprice = DiscountRule::getProductSellPrice($product->id, $this->search['fk_company']);
-								$discountSearchResult = $discountSearch->search(0, $product->id, $this->search['fk_company'], $this->search['fk_project']);
-								if ($discountSearchResult->result) {
-									// Mise en page du résultat
-									$discountSearchResult->tpMsg = getDiscountRulesInterfaceMessageTpl($langs, $discountSearchResult, $action);
-									$this->searchubprice = $discountSearchResult->subprice;
-									$finalSubprice = $discountSearchResult->calcFinalSubprice();
+							// calcule du prix unitaire final apres réduction
+							$finalSubprice = $this->searchubprice - $this->searchubprice * $reduction / 100;
 
-									if (!empty($discountSearchResult->reduction)) {
-										$reduction = $discountSearchResult->reduction;
+							// COMPTATIBILITE MODULE DISCOUNT RULE : RECHERCHE DE REGLE DE TARIFICATION
+							if (!empty($conf->discountrules->enabled) && !$isSupplier) {
+								if (!class_exists('DiscountSearch')) {
+									dol_include_once('/discountrules/class/discountSearch.class.php');
+								}
+								if (class_exists('DiscountSearch')) { // Il est possible que le module soit supprimé mais pas désinstallé
+									$discountSearch = new DiscountSearch($db);
+									$this->searchubprice = DiscountRule::getProductSellPrice($product->id, $this->search['fk_company']);
+									$discountSearchResult = $discountSearch->search(0, $product->id, $this->search['fk_company'], $this->search['fk_project']);
+									if ($discountSearchResult->result) {
+										// Mise en page du résultat
+										$discountSearchResult->tpMsg = getDiscountRulesInterfaceMessageTpl($langs, $discountSearchResult, $action);
+										$this->searchubprice = $discountSearchResult->subprice;
+										$finalSubprice = $discountSearchResult->calcFinalSubprice();
+
+										if (!empty($discountSearchResult->reduction)) {
+											$reduction = $discountSearchResult->reduction;
+										}
 									}
+								} else {
+									setEventMessage($langs->trans('ErrorMissingModuleDiscountRule'));
 								}
 							}
-							else{
-								setEventMessage($langs->trans('ErrorMissingModuleDiscountRule'));
+
+
+							$output .= '<tr class="advanced-product-search-row --data" data-product="' . $product->id . '"  >';
+							$output .= '<td class="advanced-product-search-col --ref" >' . $product->getNomUrl(1) . '</td>';
+							$output .= '<td class="advanced-product-search-col --label" >' . self::highlightWordsOfSearchQuery($product->label, $this->search['search_label'] . ' ' . $this->search['sall']) . '</td>';
+							if ($conf->stock->enabled) {
+								$output .= '<td class="advanced-product-search-col --stock-reel" >' . $product->stock_reel . '</td>';
+								$output .= '<td class="advanced-product-search-col --stock-theorique" >' . $product->stock_theorique . '</td>';
 							}
-						}
 
-
-
-						$output.= '<tr class="advanced-product-search-row --data" data-product="'.$product->id.'"  >';
-						$output.= '<td class="advanced-product-search-col --ref" >'. $product->getNomUrl(1).'</td>';
-						$output.= '<td class="advanced-product-search-col --label" >'. self::highlightWordsOfSearchQuery($product->label, $this->search['search_label'].' '.$this->search['sall']).'</td>';
-						if($conf->stock->enabled) {
-							$output .= '<td class="advanced-product-search-col --stock-reel" >' . $product->stock_reel . '</td>';
-							$output .= '<td class="advanced-product-search-col --stock-theorique" >' . $product->stock_theorique . '</td>';
-						}
-
-						if ($conf->fournisseur->enabled) {
-							$output .= '<td class="advanced-product-search-col --buy-price" >';
-							$TFournPriceList = self::getFournPriceList($product->id, $isSupplier ? $object->socid : 0);
-							if (!empty($TFournPriceList)) {
+							if ($conf->fournisseur->enabled) {
+								$output .= '<td class="advanced-product-search-col --buy-price" >';
+								$TFournPriceList = self::getFournPriceList($product->id, $isSupplier ? $object->socid : 0);
+								if (!empty($TFournPriceList)) {
 //						$output.= '<div class="default-visible" >'.price($product->pmp).'</div>';
 //						$output.= '<div class="default-hidden" >';
 
-								$this->searchelectArray = array();
-								$idSelected = '';
+									$this->searchSelectArray = array();
+									$idSelected = '';
 
-								foreach ($TFournPriceList as $TpriceInfos) {
-									$this->searchelectArray[$TpriceInfos['id']] = array(
-										'label'=>$TpriceInfos['label'],
-										'data-up'=>$TpriceInfos['price'],
-										'data-fourn_qty'=>$TpriceInfos['fourn_qty']
-									);
-									if ($TpriceInfos['id'] == 'pmpprice' && !empty($TpriceInfos['price'])) {
-										$idSelected = 'pmpprice';
-									}
-								}
-
-								if($isSupplier) { // Seuls les prix fournisseurs nous intéressent dans le cadre d'un document fournisseur (pas de PMP ou autre dans ce cas)
-									unset($this->searchelectArray['pmpprice']);
-									unset($this->searchelectArray['costprice']);
-									if(!empty($this->searchelectArray)) {
-										if(count($this->searchelectArray) == 1 && ($object->element !== 'supplier_proposal' || $conf->global->ADVANCED_PRODUCT_SEARCH_PRESELECT_IF_ONE_FOURN_PRICE_ON_SUPPLIER_PROPOSAL)) {
-											$idSelected = key($this->searchelectArray);
-											$this->searchubprice = $this->searchelectArray[$idSelected]['data-up'];
-											// Recalcul du subprice final
-											$finalSubprice = $this->searchubprice - $this->searchubprice*$reduction/100;
+									foreach ($TFournPriceList as $TpriceInfos) {
+										$this->searchSelectArray[$TpriceInfos['id']] = array(
+											'label' => $TpriceInfos['label'],
+											'data-up' => $TpriceInfos['price'],
+											'data-fourn_qty' => $TpriceInfos['fourn_qty']
+										);
+										if ($TpriceInfos['id'] == 'pmpprice' && !empty($TpriceInfos['price'])) {
+											$idSelected = 'pmpprice';
 										}
-										// On insère une valeur vide, car si plusieurs prix fourn, on laisse le choix à l'utilisateur de sélectionner celui qu'il souhaite
-										$this->searchelectArray[0] = array('data-up' => 0, 'data-fourn_qty' => 0);
 									}
-								}
+
+									if ($isSupplier) { // Seuls les prix fournisseurs nous intéressent dans le cadre d'un document fournisseur (pas de PMP ou autre dans ce cas)
+										unset($this->searchSelectArray['pmpprice']);
+										unset($this->searchSelectArray['costprice']);
+										if (!empty($this->searchSelectArray)) {
+											if (count($this->searchSelectArray) == 1 && ($object->element !== 'supplier_proposal' || $conf->global->ADVANCED_PRODUCT_SEARCH_PRESELECT_IF_ONE_FOURN_PRICE_ON_SUPPLIER_PROPOSAL)) {
+												$idSelected = key($this->searchSelectArray);
+												$this->searchubprice = $this->searchSelectArray[$idSelected]['data-up'];
+												// Recalcul du subprice final
+												$finalSubprice = $this->searchubprice - $this->searchubprice * $reduction / 100;
+											}
+											// On insère une valeur vide, car si plusieurs prix fourn, on laisse le choix à l'utilisateur de sélectionner celui qu'il souhaite
+											$this->searchSelectArray[0] = array('data-up' => 0, 'data-fourn_qty' => 0);
+										}
+									}
 
 
-								$key_in_label = 0;
-								$value_as_key = 0;
-								$moreparam = 'data-product="'.$product->id.'"';
-								$translate = 0;
-								$maxlen = 0;
-								$disabled = 0;
-								if($isSupplier) $this->searchort = 'ASC';
-								else $this->searchort = 'DESC';
-								$morecss = 'search-list-select';
-								$addjscombo = 0;
-								if(!empty($this->searchelectArray)) {
-									$output .= $form->selectArray('prodfourprice-' . $product->id, $this->searchelectArray, $idSelected, 0, $key_in_label, $value_as_key, $moreparam, $translate, $maxlen, $disabled, $this->searchort, $morecss, $addjscombo);
-								}
+									$key_in_label = 0;
+									$value_as_key = 0;
+									$moreparam = 'data-product="' . $product->id . '"';
+									$translate = 0;
+									$maxlen = 0;
+									$disabled = 0;
+									if ($isSupplier) $this->searchort = 'ASC';
+									else $this->searchort = 'DESC';
+									$morecss = 'search-list-select';
+									$addjscombo = 0;
+									if (!empty($this->searchSelectArray)) {
+										$output .= $form->selectArray('prodfourprice-' . $product->id, $this->searchSelectArray, $idSelected, 0, $key_in_label, $value_as_key, $moreparam, $translate, $maxlen, $disabled, $this->searchort, $morecss, $addjscombo);
+									}
 //						$output.= '</div>';
-							} else {
-								$output .= price($product->pmp);
+								} else {
+									$output .= price($product->pmp);
+								}
+								$output .= '</td>';
 							}
+
+
+							//
+							$output .= '<td class="advanced-product-search-col --subprice right nowraponall" >';
+							$output .= '<input id="advanced-product-search-list-input-subprice-' . $product->id . '"  data-product="' . $product->id . '"   class="advanced-product-search-list-input-subprice right on-update-calc-prices" type="number" step="any" min="0" maxlength="8" size="3" value="' . $this->searchubprice . '" placeholder="x" name="prodsubprice[' . $product->id . ']" />';
+							$output .= ' ' . $langs->trans("HT");
 							$output .= '</td>';
-						}
 
+							// REDUCTION EN %
+							$output .= '<td class="advanced-product-search-col --discount center" >';
+							$output .= '<input id="advanced-product-search-list-input-reduction-' . $product->id . '"  data-product="' . $product->id . '"   class="advanced-product-search-list-input-reduction center on-update-calc-prices" type="number" step="any" min="0" max="100" maxlength="3" size="3" value="' . $reduction . '" placeholder="%" name="prodreduction[' . $product->id . ']" />';
+							$output .= '%';
+							$output .= '</td>';
 
-						//
-						$output.= '<td class="advanced-product-search-col --subprice right nowraponall" >';
-						$output.= '<input id="advanced-product-search-list-input-subprice-'.$product->id.'"  data-product="'.$product->id.'"   class="advanced-product-search-list-input-subprice right on-update-calc-prices" type="number" step="any" min="0" maxlength="8" size="3" value="'.$this->searchubprice.'" placeholder="x" name="prodsubprice['.$product->id.']" />';
-						$output.= ' '.$langs->trans("HT");
-						$output.= '</td>';
+							// FINAL SUBPRICE AFTER REDUCTION
+							$output .= '<td class="advanced-product-search-col --finalsubprice right" >';
+							$output .= '<span id="discount-prod-list-final-subprice-' . $product->id . '"  class="final-subpriceprice" >' . price(round($finalSubprice, $conf->global->MAIN_MAX_DECIMALS_UNIT)) . '</span> ' . $langs->trans("HT");
+							$output .= '</td>';
 
-						// REDUCTION EN %
-						$output.= '<td class="advanced-product-search-col --discount center" >';
-						$output.= '<input id="advanced-product-search-list-input-reduction-'.$product->id.'"  data-product="'.$product->id.'"   class="advanced-product-search-list-input-reduction center on-update-calc-prices" type="number" step="any" min="0" max="100" maxlength="3" size="3" value="'.$reduction.'" placeholder="%" name="prodreduction['.$product->id.']" />';
-						$output.= '%';
-						$output.= '</td>';
+							// QTY
+							$output .= '<td class="advanced-product-search-col --qty" >';
+							$qty = 1;
+							$qtyMin = 0;
 
-						// FINAL SUBPRICE AFTER REDUCTION
-						$output.= '<td class="advanced-product-search-col --finalsubprice right" >';
-						$output.= '<span id="discount-prod-list-final-subprice-'.$product->id.'"  class="final-subpriceprice" >'.price(round($finalSubprice, $conf->global->MAIN_MAX_DECIMALS_UNIT)).'</span> '.$langs->trans("HT");
-						$output.= '</td>';
-
-						// QTY
-						$output.= '<td class="advanced-product-search-col --qty" >';
-						$qty = 1;
-						$qtyMin = 0;
-
-						if (!empty($this->searchelectArray)) {
-							$currentlySelectedFournPrice = reset($this->searchelectArray);
-							if (!empty($currentlySelectedFournPrice['data-fourn_qty'])) {
-								$qtyMin = doubleval($currentlySelectedFournPrice['data-fourn_qty']);
+							if (!empty($this->searchSelectArray)) {
+								$currentlySelectedFournPrice = reset($this->searchSelectArray);
+								if (!empty($currentlySelectedFournPrice['data-fourn_qty'])) {
+									$qtyMin = doubleval($currentlySelectedFournPrice['data-fourn_qty']);
+								}
 							}
-						}
-						// Si le quantity est affecter par un autre élément, plus tard.
-						if ($qtyMin > $qty) {
-							$qty = $qtyMin;
-						}
+							// Si le quantity est affecter par un autre élément, plus tard.
+							if ($qtyMin > $qty) {
+								$qty = $qtyMin;
+							}
 
-						$output.= '<input id="advanced-product-search-list-input-qty-'.$product->id.'"  data-product="'.$product->id.'"  class="advanced-product-search-list-input-qty center on-update-calc-prices" type="number" step="any" min="'.$qtyMin.'" maxlength="8" size="3" value="'.$qty.'" placeholder="x" name="prodqty['.$product->id.']" />';
-						$output.= '</td>';
+							$output .= '<input id="advanced-product-search-list-input-qty-' . $product->id . '"  data-product="' . $product->id . '"  class="advanced-product-search-list-input-qty center on-update-calc-prices" type="number" step="any" min="' . $qtyMin . '" maxlength="8" size="3" value="' . $qty . '" placeholder="x" name="prodqty[' . $product->id . ']" />';
+							$output .= '</td>';
 
-						// UNITE
-						if (!empty($conf->global->PRODUCT_USE_UNITS)) {
-							$output.= '<td class="advanced-product-search-col --unit" >';
-							$output.= $product->getLabelOfUnit();
-							$output.= '</td>';
-						}
+							// UNITE
+							if (!empty($conf->global->PRODUCT_USE_UNITS)) {
+								$output .= '<td class="advanced-product-search-col --unit" >';
+								$output .= $product->getLabelOfUnit();
+								$output .= '</td>';
+							}
 
-						$output.= '<td class="advanced-product-search-col --finalprice right" >';
-						$finalPrice = $finalSubprice*$qty;
-						$output.= '<span id="discount-prod-list-final-price-'.$product->id.'"  class="final-price" >'.price(round($finalPrice, $conf->global->MAIN_MAX_DECIMALS_TOT)).'</span> '.$langs->trans("HT");
-						$output.= '</td>';
+							$output .= '<td class="advanced-product-search-col --finalprice right" >';
+							$finalPrice = $finalSubprice * $qty;
+							$output .= '<span id="discount-prod-list-final-price-' . $product->id . '"  class="final-price" >' . price(round($finalPrice, $conf->global->MAIN_MAX_DECIMALS_TOT)) . '</span> ' . $langs->trans("HT");
+							$output .= '</td>';
 
-						$output.= '<td class="advanced-product-search-col --action" >';
+							$output .= '<td class="advanced-product-search-col --action" >';
 //					$output.= '<div class="default-hidden" >';
-						$output.= ' <button type="button" title="'.$langs->trans('ClickToAddProductInDocument').'"  data-product="'.$product->id.'" class="advance-prod-search-list-action-btn --addProductToLine" ><span class="fa fa-plus add-btn-icon"></span> '.$langs->trans('Add').'</button>';
+							$output .= ' <button type="button" title="' . $langs->trans('ClickToAddProductInDocument') . '"  data-product="' . $product->id . '" class="advance-prod-search-list-action-btn --addProductToLine" ><span class="fa fa-plus add-btn-icon"></span> ' . $langs->trans('Add') . '</button>';
 //					$output.= '</div>';
-						$output.= '</td>';
+							$output .= '</td>';
 
-						$output.= '</tr>';
-					}
-					else{
-						$output.= '<tr class="advanced-product-search-row">';
-						$output.= '<td class="advanced-product-search-col-error center" colspan="'.$colnumber.'">'. $product->errorsToString() .'</td>';
-						$output.= '</tr>';
+							$output .= '</tr>';
+						} else {
+							$output .= '<tr class="advanced-product-search-row">';
+							$output .= '<td class="advanced-product-search-col-error center" colspan="' . $colnumber . '">' . $product->errorsToString() . '</td>';
+							$output .= '</tr>';
+
+						}
 
 					}
+				} else {
+					$output .= '<tr class="advanced-product-search-row">';
+					$output .= '<td class="advanced-product-search-col-no-result" colspan="' . $colnumber . '">' . $langs->trans("NoResults") . '</td>';
+					$output .= '</tr>';
 
 				}
+			} else {
+				$output .= '<tr class="advanced-product-search-row">';
+				$output .= '<td class="advanced-product-search-col-error" colspan="' . $colnumber . '">' . $db->error() . '</td>';
+				$output .= '</tr>';
 			}
-			else{
-				$output.= '<tr class="advanced-product-search-row">';
-				$output.= '<td class="advanced-product-search-col-no-result" colspan="'.$colnumber.'">'. $langs->trans("NoResults") .'</td>';
-				$output.= '</tr>';
-
-			}
-		}
-		else{
-			$output.= '<tr class="advanced-product-search-row">';
-			$output.= '<td class="advanced-product-search-col-error" colspan="'.$colnumber.'">'. $db->error() .'</td>';
-			$output.= '</tr>';
+		} else {
+			$output .= '<tr class="advanced-product-search-row">';
+			$output .= '<td class="advanced-product-search-col-no-result" colspan="' . $colnumber . '">' . $langs->trans("launchYourFirstSearch") . '</td>';
+			$output .= '</tr>';
 		}
 
 		$output.= '</tbody>';
@@ -776,12 +785,12 @@ class AdvancedProductSearch
 
 
 	/**
-	 * @param $label		Translation key of field
-	 * @param $pageUrl		Url used when we click on sort picto
-	 * @param $field		Field to use for new sorting. Empty if this field is not sortable. Example "t.abc" or "t.abc,t.def"
-	 * @param $moreParams		Add more parameters on sort url links ("" by default)
-	 * @param $sortfield	Current field used to sort (Ex: 'd.datep,d.id')
-	 * @param $sortorder	Current sort order (Ex: 'asc,desc')
+	 * @param $label	string	Translation key of field
+	 * @param $pageUrl	string	Url used when we click on sort picto
+	 * @param $field	string	Field to use for new sorting. Empty if this field is not sortable. Example "t.abc" or "t.abc,t.def"
+	 * @param $moreParams	string	Add more parameters on sort url links ("" by default)
+	 * @param $sortfield	string Current field used to sort (Ex: 'd.datep,d.id')
+	 * @param $sortorder	string Current sort order (Ex: 'asc,desc')
 	 * @return string
 	 */
 	public static function getDialogColSortLink($label, $pageUrl, $field, $moreParams, $sortfield, $sortorder, $moreClass = ""){
@@ -828,28 +837,28 @@ class AdvancedProductSearch
 	/**
 	 * Return an object
 	 *
-	 * @param string $objecttype Type of object ('invoice', 'order', 'expedition_bon', 'myobject@mymodule', ...)
+	 * @param string $objectType Type of object ('invoice', 'order', 'expedition_bon', 'myobject@mymodule', ...)
 	 * @param $db
 	 * @return int object of $objecttype
 	 */
-	public static function objectAutoLoad($objecttype, &$db)
+	public static function objectAutoLoad($objectType, &$db)
 	{
-		global $conf, $langs;
+		global $conf;
 
 		$ret = -1;
 		$regs = array();
 
 		// Parse $objecttype (ex: project_task)
-		$module = $myobject = $objecttype;
+		$module = $myobject = $objectType;
 
 		// If we ask an resource form external module (instead of default path)
-		if (preg_match('/^([^@]+)@([^@]+)$/i', $objecttype, $regs)) {
+		if (preg_match('/^([^@]+)@([^@]+)$/i', $objectType, $regs)) {
 			$myobject = $regs[1];
 			$module = $regs[2];
 		}
 
 
-		if (preg_match('/^([^_]+)_([^_]+)/i', $objecttype, $regs))
+		if (preg_match('/^([^_]+)_([^_]+)/i', $objectType, $regs))
 		{
 			$module = $regs[1];
 			$myobject = $regs[2];
@@ -859,65 +868,65 @@ class AdvancedProductSearch
 		$classpath = $module.'/class';
 
 		// Special cases, to work with non standard path
-		if ($objecttype == 'facture' || $objecttype == 'invoice') {
+		if ($objectType == 'facture' || $objectType == 'invoice') {
 			$classpath = 'compta/facture/class';
 			$module='facture';
 			$myobject='facture';
 		}
-		elseif ($objecttype == 'commande' || $objecttype == 'order') {
+		elseif ($objectType == 'commande' || $objectType == 'order') {
 			$classpath = 'commande/class';
 			$module='commande';
 			$myobject='commande';
 		}
-		elseif ($objecttype == 'propal')  {
+		elseif ($objectType == 'propal')  {
 			$classpath = 'comm/propal/class';
 		}
-		elseif ($objecttype == 'shipping') {
+		elseif ($objectType == 'shipping') {
 			$classpath = 'expedition/class';
 			$myobject = 'expedition';
 			$module = 'expedition_bon';
 		}
-		elseif ($objecttype == 'delivery') {
+		elseif ($objectType == 'delivery') {
 			$classpath = 'livraison/class';
 			$myobject = 'livraison';
 			$module = 'livraison_bon';
 		}
-		elseif ($objecttype == 'contract') {
+		elseif ($objectType == 'contract') {
 			$classpath = 'contrat/class';
 			$module='contrat';
 			$myobject='contrat';
 		}
-		elseif ($objecttype == 'member') {
+		elseif ($objectType == 'member') {
 			$classpath = 'adherents/class';
 			$module='adherent';
 			$myobject='adherent';
 		}
-		elseif ($objecttype == 'cabinetmed_cons') {
+		elseif ($objectType == 'cabinetmed_cons') {
 			$classpath = 'cabinetmed/class';
 			$module='cabinetmed';
 			$myobject='cabinetmedcons';
 		}
-		elseif ($objecttype == 'fichinter') {
+		elseif ($objectType == 'fichinter') {
 			$classpath = 'fichinter/class';
 			$module='ficheinter';
 			$myobject='fichinter';
 		}
-		elseif ($objecttype == 'task') {
+		elseif ($objectType == 'task') {
 			$classpath = 'projet/class';
 			$module='projet';
 			$myobject='task';
 		}
-		elseif ($objecttype == 'stock') {
+		elseif ($objectType == 'stock') {
 			$classpath = 'product/stock/class';
 			$module='stock';
 			$myobject='stock';
 		}
-		elseif ($objecttype == 'inventory') {
+		elseif ($objectType == 'inventory') {
 			$classpath = 'product/inventory/class';
 			$module='stock';
 			$myobject='inventory';
 		}
-		elseif ($objecttype == 'mo') {
+		elseif ($objectType == 'mo') {
 			$classpath = 'mrp/class';
 			$module='mrp';
 			$myobject='mo';
@@ -927,30 +936,30 @@ class AdvancedProductSearch
 		$classfile = strtolower($myobject); $classname = ucfirst($myobject);
 		//print "objecttype=".$objecttype." module=".$module." subelement=".$subelement." classfile=".$classfile." classname=".$classname;
 
-		if ($objecttype == 'invoice_supplier') {
+		if ($objectType == 'invoice_supplier') {
 			$classfile = 'fournisseur.facture';
 			$classname = 'FactureFournisseur';
 			$classpath = 'fourn/class';
 			$module = 'fournisseur';
 		}
-		elseif ($objecttype == 'order_supplier') {
+		elseif ($objectType == 'order_supplier') {
 			$classfile = 'fournisseur.commande';
 			$classname = 'CommandeFournisseur';
 			$classpath = 'fourn/class';
 			$module = 'fournisseur';
 		}
-		elseif ($objecttype == 'supplier_proposal') {
+		elseif ($objectType == 'supplier_proposal') {
 			$classpath = 'supplier_proposal/class';
 			$classfile = 'supplier_proposal';
 			$classname = 'SupplierProposal';
 			$module = 'supplier_proposal';
 		}
-		elseif ($objecttype == 'stock') {
+		elseif ($objectType == 'stock') {
 			$classpath = 'product/stock/class';
 			$classfile = 'entrepot';
 			$classname = 'Entrepot';
 		}
-		elseif ($objecttype == 'dolresource') {
+		elseif ($objectType == 'dolresource') {
 			$classpath = 'resource/class';
 			$classfile = 'dolresource';
 			$classname = 'Dolresource';
