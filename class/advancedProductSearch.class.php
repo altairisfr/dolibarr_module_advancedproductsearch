@@ -10,6 +10,10 @@ class AdvancedProductSearch
 	public $displayResults = true; // TODO ajouter une valeur par défaut en conf
 
 	public $searchSelectArray;
+	public $searchSqlSelectCount;
+	public $fieldsToSearchAll;
+	public $fieldsToSearchAllText;
+	public $searchSqlList;
 
 	/**
 	 * @var string[]
@@ -294,23 +298,23 @@ class AdvancedProductSearch
 		// REQUETTE SQL
 
 		// List of fields to search into when doing a "search in all"
-		$fieldstosearchall = array('p.ref','p.label','p.description',"p.note");
-		$fieldstosearchallText =array('Ref', 'Label', 'Description', 'Note');
+		$this->fieldsToSearchAll = array('p.ref','p.label','p.description',"p.note");
+		$this->fieldsToSearchAllText =array('Ref', 'Label', 'Description', 'Note');
 
 		// multilang
 		if (!empty($conf->global->MAIN_MULTILANGS)){
-			$fieldstosearchall+= array('pl.label','pl.description','pl.note');
+			$this->fieldsToSearchAll+= array('pl.label','pl.description','pl.note');
 		}
 
 		if (!empty($conf->barcode->enabled)) {
-			$fieldstosearchall+=  array('p.barcode','pfp.barcode');
-			$fieldstosearchallText[]='Barcode';
+			$this->fieldsToSearchAll+=  array('p.barcode','pfp.barcode');
+			$this->fieldsToSearchAllText[]='Barcode';
 		}
 
 		// Filter on supplier
 		if (!empty($conf->fournisseur->enabled)){
-			$fieldstosearchall+=  array('pfp.ref_fourn');
-			$fieldstosearchallText[]='ProductRefFourn';
+			$this->fieldsToSearchAll+=  array('pfp.ref_fourn');
+			$this->fieldsToSearchAllText[]='ProductRefFourn';
 		}
 
 		// SELECT PART
@@ -331,12 +335,13 @@ class AdvancedProductSearch
 		if (isset($this->search['search_tosell']) && dol_strlen($this->search['search_tosell']) > 0 && $this->search['search_tosell'] != -1) $this->searchSql .= " AND p.tosell = ".((int) $this->search['search_tosell']);
 		if (isset($this->search['search_tobuy']) && dol_strlen($this->search['search_tobuy']) > 0 && $this->search['search_tobuy'] != -1)   $this->searchSql .= " AND p.tobuy = ".((int) $this->search['search_tobuy']);
 
-		if ($this->search['sall']) $this->searchSql .= natural_search($fieldstosearchall, $this->search['sall']);
-		// if the type is not 1, we show all products (type = 0,2,3)
-//	if (dol_strlen($this->search['search_type']) && $this->search['search_type'] != '-1'){
-//		if ($this->search['search_type'] == 1) $this->searchSql .= " AND p.fk_product_type = 1";
-//		else $this->searchSql .= " AND p.fk_product_type <> 1";
-//	}
+		if ($this->search['sall']) $this->searchSql .= natural_search($this->fieldsToSearchAll, $this->search['sall']);
+
+//		// if the type is not 1, we show all products (type = 0,2,3)
+//		if (dol_strlen($this->search['search_type']) && $this->search['search_type'] != '-1'){
+//			if ($this->search['search_type'] == 1) $this->searchSql .= " AND p.fk_product_type = 1";
+//			else $this->searchSql .= " AND p.fk_product_type <> 1";
+//		}
 
 		if ($this->search['search_ref'])     $this->searchSql .= natural_search('p.ref', $this->search['search_ref']);
 		if ($this->search['search_label'])   $this->searchSql .= natural_search('p.label', $this->search['search_label']);
@@ -408,23 +413,23 @@ class AdvancedProductSearch
 			}
 		}
 
-		$morehtmlcenter= '<div class="advanced-product-global-search-container" >';
+		$moreHtmlCenter= '<div class="advanced-product-global-search-container" >';
 
-		foreach ($fieldstosearchallText as $i => $langKey){
-			$fieldstosearchallText[$i] = $langs->trans($langKey);
+		foreach ($this->fieldsToSearchAllText as $i => $langKey){
+			$this->fieldsToSearchAllText[$i] = $langs->trans($langKey);
 		}
-		$toolTip = $langs->trans('SearchWillBeOnTheseFields', '<br/>' . implode(', ' , $fieldstosearchallText));
+		$toolTip = $langs->trans('SearchWillBeOnTheseFields', '<br/>' . implode(', ' , $this->fieldsToSearchAllText));
 
 
-		$morehtmlcenter.= '<input name="sall" value="'.dol_htmlentities($this->search['sall']).'" id="search-all-form-input" class="advanced-product-global-search-input" placeholder="'.$langs->trans('Search').'" autocomplete="off">';
-		$morehtmlcenter.= '<i title="'.dol_escape_htmltag($toolTip).'" class="fa fa-question-circle classfortooltip"></i>';
-		$morehtmlcenter.= '</div>';
+		$moreHtmlCenter.= '<input name="sall" value="'.dol_htmlentities($this->search['sall']).'" id="search-all-form-input" class="advanced-product-global-search-input" placeholder="'.$langs->trans('Search').'" autocomplete="off">';
+		$moreHtmlCenter.= '<i title="'.dol_escape_htmltag($toolTip).'" class="fa fa-question-circle classfortooltip"></i>';
+		$moreHtmlCenter.= '</div>';
 
 		$picto = 'product';
 		if ($this->search['type'] == 1) $picto = 'service';
 
 		ob_start(); // parceque dolibarr aime tellement le print ...
-		print_barre_liste($langs->trans('AdvancedProductSearch'), $this->search['page'], $this->search['pageUrl'], $param, $this->search['sortfield'], $this->search['sortorder'], $morehtmlcenter, $curentCountResult, $globalCountResult, $picto, 0, '', '', $this->search['limit'], 0, 0, 0);
+		print_barre_liste($langs->trans('AdvancedProductSearch'), $this->search['page'], $this->search['pageUrl'], $param, $this->search['sortfield'], $this->search['sortorder'], $moreHtmlCenter, $curentCountResult, $globalCountResult, $picto, 0, '', '', $this->search['limit'], 0, 0, 0);
 		$output.= ob_get_contents();
 		ob_end_clean();
 
@@ -441,47 +446,47 @@ class AdvancedProductSearch
 			$output.= '</div>';
 		}
 
-		$moreforfilter = '';
+		$moreForFilter = '';
 		// Filter on supplier
 		if (!empty($conf->fournisseur->enabled))
 		{
-			$moreforfilter .= '<div class="divsearchfield" >';
-			$moreforfilter .= $langs->trans('Supplier').': ';
-			$moreforfilter .= $form->select_company($this->search['fourn_id'], 'fourn_id', '', 1, 'supplier');
-			$moreforfilter .= '</div>';
+			$moreForFilter .= '<div class="divsearchfield" >';
+			$moreForFilter .= $langs->trans('Supplier').': ';
+			$moreForFilter .= $form->select_company($this->search['fourn_id'], 'fourn_id', '', 1, 'supplier');
+			$moreForFilter .= '</div>';
 
-			$moreforfilter .= '<div class="divsearchfield" >';
-			$moreforfilter .= $langs->trans('SupplierRef').': ';
-			$moreforfilter .= '<input type="text" name="search_supplierref" value="'.dol_htmlentities($this->search['search_supplierref']).'" />';
-			$moreforfilter .= '</div>';
+			$moreForFilter .= '<div class="divsearchfield" >';
+			$moreForFilter .= $langs->trans('SupplierRef').': ';
+			$moreForFilter .= '<input type="text" name="search_supplierref" value="'.dol_htmlentities($this->search['search_supplierref']).'" />';
+			$moreForFilter .= '</div>';
 		}
 
 
 		// Filter on categories
 		if (!empty($conf->categorie->enabled))
 		{
-			$moreforfilter .= '<div class="divsearchfield" >';
-			$moreforfilter .= $langs->trans('ProductCategories').': ';
+			$moreForFilter .= '<div class="divsearchfield" >';
+			$moreForFilter .= $langs->trans('ProductCategories').': ';
 			$categoriesProductArr = $form->select_all_categories(Categorie::TYPE_PRODUCT, '', '', 64, 0, 1);
 			$categoriesProductArr[-2] = '- '.$langs->trans('NotCategorized').' -';
-			$moreforfilter .= Form::multiselectarray('search_category_product_list', $categoriesProductArr, $this->search['searchCategoryProductList'], 0, 0, 'minwidth300');
-			$moreforfilter .= ' <label><input type="checkbox" class="valignmiddle" name="search_category_product_operator" value="1"'.($this->search['searchCategoryProductOperator'] == 1 ? ' checked="checked"' : '').'/> '.$langs->trans('UseOrOperatorForCategories').'</label>';
-			$moreforfilter .= '</div>';
+			$moreForFilter .= Form::multiselectarray('search_category_product_list', $categoriesProductArr, $this->search['searchCategoryProductList'], 0, 0, 'minwidth300');
+			$moreForFilter .= ' <label><input type="checkbox" class="valignmiddle" name="search_category_product_operator" value="1"'.($this->search['searchCategoryProductOperator'] == 1 ? ' checked="checked"' : '').'/> '.$langs->trans('UseOrOperatorForCategories').'</label>';
+			$moreForFilter .= '</div>';
 		}
 
 //	$parameters = array();
 //	$reshook = $hookmanager->executeHooks('printFieldPreListTitle', $parameters); // Note that $action and $object may have been modified by hook
-//	if (empty($reshook)) $moreforfilter .= $hookmanager->resPrint;
-//	else $moreforfilter = $hookmanager->resPrint;
+//	if (empty($reshook)) $moreForFilter .= $hookmanager->resPrint;
+//	else $moreForFilter = $hookmanager->resPrint;
 
-		if ($moreforfilter)
+		if ($moreForFilter)
 		{
 			$output.= '<div class="liste_titre liste_titre_bydiv centpercent">';
-			$output.= $moreforfilter;
+			$output.= $moreForFilter;
 			$output.= '</div>';
 		}
 
-		$colnumber = 8;
+		$colNumber = 8;
 
 		$output.= '<table class="noborder centpercent advance-search-product-results" >';
 		$output.= '<thead>';
@@ -541,11 +546,11 @@ class AdvancedProductSearch
 		if($conf->stock->enabled){
 			$output.= '	<th class="advanced-product-search-col --stock-reel center" >'.$langs->trans('RealStock').'</th>';
 			$output.= '	<th class="advanced-product-search-col --stock-theorique center" >'.$langs->trans('VirtualStock').'</th>';
-			$colnumber+=2;
+			$colNumber+=2;
 		}
 
 		if ($conf->fournisseur->enabled) {
-			$colnumber++;
+			$colNumber++;
 			$output .= '	<th class="advanced-product-search-col --buy-price" >' . ($isSupplier ? $langs->trans('PredefinedFournPricesForFill').img_help(1, $langs->trans('PredefinedFournPricesForFillHelp')) : $langs->trans('BuyPrice')) . '</th>';
 		}
 		$output.= '	<th class="advanced-product-search-col --subprice" >'.$langs->trans('Price').'</th>';
@@ -554,7 +559,7 @@ class AdvancedProductSearch
 		$output.= '	<th class="advanced-product-search-col --qty" >'.$langs->trans('Qty').'</th>';
 
 		if (!empty($conf->global->PRODUCT_USE_UNITS)) {
-			$colnumber++;
+			$colNumber++;
 			$output.= '<th class="advanced-product-search-col --unit" >';
 			$output.= $langs->trans('Unit');
 			$output.= '</th>';
@@ -753,7 +758,7 @@ class AdvancedProductSearch
 							$output .= '</tr>';
 						} else {
 							$output .= '<tr class="advanced-product-search-row">';
-							$output .= '<td class="advanced-product-search-col-error center" colspan="' . $colnumber . '">' . $product->errorsToString() . '</td>';
+							$output .= '<td class="advanced-product-search-col-error center" colspan="' . $colNumber . '">' . $product->errorsToString() . '</td>';
 							$output .= '</tr>';
 
 						}
@@ -761,18 +766,18 @@ class AdvancedProductSearch
 					}
 				} else {
 					$output .= '<tr class="advanced-product-search-row">';
-					$output .= '<td class="advanced-product-search-col-no-result" colspan="' . $colnumber . '">' . $langs->trans("NoResults") . '</td>';
+					$output .= '<td class="advanced-product-search-col-no-result" colspan="' . $colNumber . '">' . $langs->trans("NoResults") . '</td>';
 					$output .= '</tr>';
 
 				}
 			} else {
 				$output .= '<tr class="advanced-product-search-row">';
-				$output .= '<td class="advanced-product-search-col-error" colspan="' . $colnumber . '">' . $db->error() . '</td>';
+				$output .= '<td class="advanced-product-search-col-error" colspan="' . $colNumber . '">' . $db->error() . '</td>';
 				$output .= '</tr>';
 			}
 		} else {
 			$output .= '<tr class="advanced-product-search-row">';
-			$output .= '<td class="advanced-product-search-col-no-result" colspan="' . $colnumber . '">' . $langs->trans("launchYourFirstSearch") . '</td>';
+			$output .= '<td class="advanced-product-search-col-no-result" colspan="' . $colNumber . '">' . $langs->trans("launchYourFirstSearch") . '</td>';
 			$output .= '</tr>';
 		}
 
@@ -1091,16 +1096,16 @@ class AdvancedProductSearch
 			if ($societe) {
 				$TSellPrice = $product->getSellPrice($mysoc, $societe);
 				if (!empty($TSellPrice)) {
-					$baseSubprice = $TSellPrice['pu_ht'];
+					$baseSubPrice = $TSellPrice['pu_ht'];
 				}
 			}
 
 			// si pas de prix client alors on force sur le prix de la fiche produit
-			if (empty($baseSubprice)) {
-				$baseSubprice = $product->price;
+			if (empty($baseSubPrice)) {
+				$baseSubPrice = $product->price;
 			}
 
-			return round($baseSubprice, $conf->global->MAIN_MAX_DECIMALS_UNIT);
+			return round($baseSubPrice, $conf->global->MAIN_MAX_DECIMALS_UNIT);
 		}
 
 		return false;
