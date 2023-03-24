@@ -686,12 +686,12 @@ class AdvancedProductSearch
 									$translate = 0;
 									$maxlen = 0;
 									$disabled = 0;
-									if ($isSupplier) $this->searchort = 'ASC';
-									else $this->searchort = 'DESC';
+									if ($isSupplier) $this->searchSort = 'ASC';
+									else $this->searchSort = 'DESC';
 									$morecss = 'search-list-select';
 									$addjscombo = 0;
 									if (!empty($this->searchSelectArray)) {
-										$output .= $form->selectArray('prodfourprice-' . $product->id, $this->searchSelectArray, $idSelected, 0, $key_in_label, $value_as_key, $moreparam, $translate, $maxlen, $disabled, $this->searchort, $morecss, $addjscombo);
+										$output .= $form->selectArray('prodfourprice-' . $product->id, $this->searchSelectArray, $idSelected, 0, $key_in_label, $value_as_key, $moreparam, $translate, $maxlen, $disabled, $this->searchSort, $morecss, $addjscombo);
 									}
 //						$output.= '</div>';
 								} else {
