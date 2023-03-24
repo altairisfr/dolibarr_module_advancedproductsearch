@@ -48,8 +48,8 @@ class AdvancedProductSearch
 		'search_barcode' => '',
 		'search_label' => '',
 		//	'search_vatrate'
-		'searchCategoryProductOperator' => 0,
-		'searchCategoryProductList' => '',
+		'search_category_product_operator' => 0,
+		'search_category_product_list' => '',
 		'search_tosell' => 1,
 		//	'search_tobuy'
 		'fourn_id' => '',
@@ -162,8 +162,8 @@ class AdvancedProductSearch
 		if (!empty($contextpage) && $contextpage != $_SERVER["PHP_SELF"]) $this->urlParams['contextpage'] = $contextpage;
 		if ($this->search['limit'] > 0 && $this->search['limit'] != $conf->liste_limit) $this->urlParams['limit'] = $this->search['limit'];
 		if ($this->search['sall']) $this->urlParams['sall'] = $this->search['sall'];
-		if ($this->search['searchCategoryProductOperator'] == 1) $this->urlParams['search_category_product_operator'] = $this->search['searchCategoryProductOperator'];
-		foreach ($this->search['searchCategoryProductList'] as $this->searchearchCategoryProduct) {
+		if ($this->search['search_category_product_operator'] == 1) $this->urlParams['search_category_product_operator'] = $this->search['search_category_product_operator'];
+		foreach ($this->search['search_category_product_list'] as $this->searchearchCategoryProduct) {
 			$this->urlParams['search_category_product_list[]'] = $this->search['searchearchCategoryProduct'];
 		}
 		if ($this->search['search_ref']) $this->urlParams['search_ref'] = $this->search['search_ref'];
@@ -216,8 +216,8 @@ class AdvancedProductSearch
 
 		$this->search['search_type'] = -1; // TODO $this->search['search_type'] = GETPOST("search_type", 'int');
 //	$this->search['search_vatrate'] = GETPOST("search_vatrate", 'alpha');
-		$this->search['searchCategoryProductOperator'] = (GETPOST('search_category_product_operator', 'int') ? GETPOST('search_category_product_operator', 'int') : 0);
-		$this->search['searchCategoryProductList'] = GETPOST('search_category_product_list', 'array');
+		$this->search['search_category_product_operator'] = (GETPOST('search_category_product_operator', 'int') ? GETPOST('search_category_product_operator', 'int') : 0);
+		$this->search['search_category_product_list'] = GETPOST('search_category_product_list', 'array');
 		$this->search['search_tosell'] = 1; // GETPOST("search_tosell", 'int'); // TODO
 //	$this->search['search_tobuy'] = GETPOST("search_tobuy", 'int'); // TODO
 		$this->search['fourn_id'] = GETPOST("fourn_id", 'int');
@@ -325,7 +325,7 @@ class AdvancedProductSearch
 		$this->searchSqlSelectCount = ' COUNT(DISTINCT p.rowid) as nb_results ';
 
 		$this->searchSql = ' FROM '.MAIN_DB_PREFIX.'product as p ';
-		if (!empty($this->search['searchCategoryProductList']) || !empty($this->search['catid'])) $this->searchSql .= ' LEFT JOIN '.MAIN_DB_PREFIX."categorie_product as cp ON (p.rowid = cp.fk_product) "; // We'll need this table joined to the select in order to filter by categ
+		if (!empty($this->search['search_category_product_list']) || !empty($this->search['catid'])) $this->searchSql .= ' LEFT JOIN '.MAIN_DB_PREFIX."categorie_product as cp ON (p.rowid = cp.fk_product) "; // We'll need this table joined to the select in order to filter by categ
 		$this->searchSql .= " LEFT JOIN ".MAIN_DB_PREFIX."product_fournisseur_price as pfp ON (pfp.fk_product = p.rowid) ";
 		// multilang
 		if (!empty($conf->global->MAIN_MULTILANGS)) $this->searchSql .= " LEFT JOIN ".MAIN_DB_PREFIX."product_lang as pl ON (pl.fk_product = p.rowid AND pl.lang = '".$langs->getDefaultLang()."' )";
@@ -355,8 +355,8 @@ class AdvancedProductSearch
 		if ($this->search['catid'] == -2)   $this->searchSql .= " AND cp.fk_categorie IS NULL";
 
 		$this->searchearchCategoryProductSqlList = array();
-		if ($this->search['searchCategoryProductOperator'] == 1) {
-			foreach ($this->search['searchCategoryProductList'] as $this->searchearchCategoryProduct) {
+		if ($this->search['search_category_product_operator'] == 1) {
+			foreach ($this->search['search_category_product_list'] as $this->searchearchCategoryProduct) {
 				if (intval($this->searchearchCategoryProduct) == -2) {
 					$this->searchearchCategoryProductSqlList[] = "cp.fk_categorie IS NULL";
 				} elseif (intval($this->searchearchCategoryProduct) > 0) {
@@ -367,7 +367,7 @@ class AdvancedProductSearch
 				$this->searchSql .= " AND (".implode(' OR ', $this->searchearchCategoryProductSqlList).")";
 			}
 		} else {
-			foreach ($this->search['searchCategoryProductList'] as $this->searchearchCategoryProduct) {
+			foreach ($this->search['search_category_product_list'] as $this->searchearchCategoryProduct) {
 				if (intval($this->searchearchCategoryProduct) == -2) {
 					$this->searchearchCategoryProductSqlList[] = "cp.fk_categorie IS NULL";
 				} elseif (intval($this->searchearchCategoryProduct) > 0) {
@@ -469,8 +469,8 @@ class AdvancedProductSearch
 			$moreForFilter .= $langs->trans('ProductCategories').': ';
 			$categoriesProductArr = $form->select_all_categories(Categorie::TYPE_PRODUCT, '', '', 64, 0, 1);
 			$categoriesProductArr[-2] = '- '.$langs->trans('NotCategorized').' -';
-			$moreForFilter .= Form::multiselectarray('search_category_product_list', $categoriesProductArr, $this->search['searchCategoryProductList'], 0, 0, 'minwidth300');
-			$moreForFilter .= ' <label><input type="checkbox" class="valignmiddle" name="search_category_product_operator" value="1"'.($this->search['searchCategoryProductOperator'] == 1 ? ' checked="checked"' : '').'/> '.$langs->trans('UseOrOperatorForCategories').'</label>';
+			$moreForFilter .= Form::multiselectarray('search_category_product_list', $categoriesProductArr, $this->search['search_category_product_list'], 0, 0, 'minwidth300');
+			$moreForFilter .= ' <label><input type="checkbox" class="valignmiddle" name="search_category_product_operator" value="1"'.($this->search['search_category_product_operator'] == 1 ? ' checked="checked"' : '').'/> '.$langs->trans('UseOrOperatorForCategories').'</label>';
 			$moreForFilter .= '</div>';
 		}
 
