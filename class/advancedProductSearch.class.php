@@ -659,8 +659,18 @@ class AdvancedProductSearch
 											'data-up' => $TpriceInfos['price'],
 											'data-fourn_qty' => $TpriceInfos['fourn_qty']
 										);
-										if ($TpriceInfos['id'] == 'pmpprice' && !empty($TpriceInfos['price'])) {
-											$idSelected = 'pmpprice';
+										if (!empty($conf->margin->enabled)) {
+											if ($conf->global->MARGIN_TYPE == 1 && is_numeric($TpriceInfos['id'])) {
+												$idSelected = $TpriceInfos['id'];
+											} elseif ($conf->global->MARGIN_TYPE === 'pmp') {
+												$idSelected = 'pmpprice';
+											} elseif ($conf->global->MARGIN_TYPE === 'costprice') {
+												$idSelected = 'costprice';
+											}
+										} else {
+											if ($TpriceInfos['id'] == 'pmpprice' && !empty($TpriceInfos['price'])) {
+												$idSelected = 'pmpprice';
+											}
 										}
 									}
 
