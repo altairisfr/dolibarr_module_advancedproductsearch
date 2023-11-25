@@ -40,6 +40,18 @@ jQuery(function ($) {
 	})
 
 
+	$(document).keydown(function(e) { //For any other keypress event
+		if (e.which == 37) { //Checking if it's left button
+			if(ctrlPressed == true){ //If it's space, check if ctrl key is also pressed
+				if($('.paginationprevious')){
+					$('.paginationprevious').trigger("click");
+				}
+				ctrlPressed = false; //Important! Set ctrlPressed variable to false. Otherwise the code will work everytime you press the space button again
+			}
+		}
+	})
+
+
 	//_________________________________________________
 	// RECHERCHE GLOBALE AUTOMATIQUE SUR FIN DE SAISIE
 	// (Uniquement sur la recherche globale)
