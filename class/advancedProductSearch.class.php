@@ -289,7 +289,7 @@ class AdvancedProductSearch
 		}
 
 
-		$param = $this->setUrlParamsFromSearch();
+		$param = '&'.$this->setUrlParamsFromSearch();
 
 		// REQUETTE SQL
 
