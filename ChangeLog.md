@@ -3,6 +3,7 @@
 
 # NOT RELEASED
 
+- FIX : User experience - *25/11/2023* - 1.4.1
 - NEW : Factoring and improve speed - *08/08/2022* - 1.4.0
 
 ## 1.3
