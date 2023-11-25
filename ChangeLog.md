@@ -3,7 +3,7 @@
 
 # NOT RELEASED
 
-
+- NEW : Factoring and improve speed - *08/08/2022* - 1.4.0
 
 ## 1.3
 - FIX : PHP 8 - *08/08/2022* - 1.3.4
