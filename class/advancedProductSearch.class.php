@@ -1115,7 +1115,7 @@ class AdvancedProductSearch
 				$baseSubPrice = $product->price;
 			}
 
-			return round($baseSubPrice, $conf->global->MAIN_MAX_DECIMALS_UNIT);
+			return round(floatval($baseSubPrice), $conf->global->MAIN_MAX_DECIMALS_UNIT);
 		}
 
 		return false;
