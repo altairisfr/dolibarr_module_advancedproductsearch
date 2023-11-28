@@ -992,8 +992,8 @@ class AdvancedProductSearch
 			if (empty($baseSubprice)) {
 				$baseSubprice = $product->price;
 			}
-
-			return round($baseSubprice, $conf->global->MAIN_MAX_DECIMALS_UNIT);
+			
+			return round(floatval($baseSubprice), $conf->global->MAIN_MAX_DECIMALS_UNIT);
 		}
 
 		return false;
