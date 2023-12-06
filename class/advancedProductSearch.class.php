@@ -302,7 +302,7 @@ class AdvancedProductSearch
 		$this->fieldsToSearchAllText =array('Ref', 'Label', 'Description', 'Note');
 
 		// multilang
-		if (!empty($conf->global->MAIN_MULTILANGS)){
+		if (!empty(getDolGlobalString('MAIN_MULTILANGS'))){
 			$this->fieldsToSearchAll+= array('pl.label','pl.description','pl.note');
 		}
 
@@ -319,7 +319,7 @@ class AdvancedProductSearch
 
 		// SELECT PART
 		$this->searchSqlSelect = ' DISTINCT p.rowid, p.ref, p.label ';
-		if (!empty($conf->global->PRODUCT_USE_UNITS))   $this->searchSqlSelect .= ' ,cu.label as cu_label';
+		if (!empty(getDolGlobalString('PRODUCT_USE_UNITS')))   $this->searchSqlSelect .= ' ,cu.label as cu_label';
 
 		// SELECT COUNT PART
 		$this->searchSqlSelectCount = ' COUNT(DISTINCT p.rowid) as nb_results ';
@@ -328,8 +328,8 @@ class AdvancedProductSearch
 		if (!empty($this->search['search_category_product_list']) || !empty($this->search['catid'])) $this->searchSql .= ' LEFT JOIN '.MAIN_DB_PREFIX."categorie_product as cp ON (p.rowid = cp.fk_product) "; // We'll need this table joined to the select in order to filter by categ
 		$this->searchSql .= " LEFT JOIN ".MAIN_DB_PREFIX."product_fournisseur_price as pfp ON (pfp.fk_product = p.rowid) ";
 		// multilang
-		if (!empty($conf->global->MAIN_MULTILANGS)) $this->searchSql .= " LEFT JOIN ".MAIN_DB_PREFIX."product_lang as pl ON (pl.fk_product = p.rowid AND pl.lang = '".$langs->getDefaultLang()."' )";
-		if (!empty($conf->global->PRODUCT_USE_UNITS))   $this->searchSql .= " LEFT JOIN ".MAIN_DB_PREFIX."c_units cu ON (cu.rowid = p.fk_unit)";
+		if (!empty(getDolGlobalString('MAIN_MULTILANGS'))) $this->searchSql .= " LEFT JOIN ".MAIN_DB_PREFIX."product_lang as pl ON (pl.fk_product = p.rowid AND pl.lang = '".$langs->getDefaultLang()."' )";
+		if (!empty(getDolGlobalString('PRODUCT_USE_UNITS')))   $this->searchSql .= " LEFT JOIN ".MAIN_DB_PREFIX."c_units cu ON (cu.rowid = p.fk_unit)";
 
 		$this->searchSql .= ' WHERE p.entity IN ('.getEntity('product').')';
 		if (isset($this->search['search_tosell']) && dol_strlen($this->search['search_tosell']) > 0 && $this->search['search_tosell'] != -1) $this->searchSql .= " AND p.tosell = ".((int) $this->search['search_tosell']);
@@ -507,7 +507,7 @@ class AdvancedProductSearch
 			$output.= '	<th class="advanced-product-search-col --stock-theorique center" ></th>';
 		}
 
-		if ($conf->fournisseur->enabled) {
+		if (property_exists($conf->fournisseur, 'enabled') && $conf->fournisseur->enabled) {
 			$output .= '	<th class="advanced-product-search-col --buy-price" ></th>';
 		}
 
@@ -516,7 +516,7 @@ class AdvancedProductSearch
 		$output.= '	<th class="advanced-product-search-col --finalsubprice" ></th>';
 		$output.= '	<th class="advanced-product-search-col --qty" ></th>';
 
-		if (!empty($conf->global->PRODUCT_USE_UNITS)) {
+		if (!empty(getDolGlobalString('PRODUCT_USE_UNITS'))) {
 			$output.= '<th class="advanced-product-search-col --unit" >';
 			$output.= '</th>';
 		}
@@ -548,8 +548,7 @@ class AdvancedProductSearch
 			$output.= '	<th class="advanced-product-search-col --stock-theorique center" >'.$langs->trans('VirtualStock').'</th>';
 			$colNumber+=2;
 		}
-
-		if ($conf->fournisseur->enabled) {
+		if (property_exists($conf->fournisseur, 'enabled') && $conf->fournisseur->enabled) {
 			$colNumber++;
 			$output .= '	<th class="advanced-product-search-col --buy-price" >' . ($isSupplier ? $langs->trans('PredefinedFournPricesForFill').img_help(1, $langs->trans('PredefinedFournPricesForFillHelp')) : $langs->trans('BuyPrice')) . '</th>';
 		}
@@ -558,7 +557,7 @@ class AdvancedProductSearch
 		$output.= '	<th class="advanced-product-search-col --finalsubprice" >'.$langs->trans('FinalDiscountSubPrice').'</th>';
 		$output.= '	<th class="advanced-product-search-col --qty" >'.$langs->trans('Qty').'</th>';
 
-		if (!empty($conf->global->PRODUCT_USE_UNITS)) {
+		if (!empty(getDolGlobalString('PRODUCT_USE_UNITS'))) {
 			$colNumber++;
 			$output.= '<th class="advanced-product-search-col --unit" >';
 			$output.= $langs->trans('Unit');
@@ -643,7 +642,7 @@ class AdvancedProductSearch
 								$output .= '<td class="advanced-product-search-col --stock-theorique" >' . $product->stock_theorique . '</td>';
 							}
 
-							if ($conf->fournisseur->enabled) {
+							if (property_exists($conf->fournisseur, 'enabled') && $conf->fournisseur->enabled) {
 								$output .= '<td class="advanced-product-search-col --buy-price" >';
 								$TFournPriceList = self::getFournPriceList($product->id, $isSupplier ? $object->socid : 0);
 								if (!empty($TFournPriceList)) {
@@ -660,11 +659,11 @@ class AdvancedProductSearch
 											'data-fourn_qty' => $TpriceInfos['fourn_qty']
 										);
 										if (!empty($conf->margin->enabled)) {
-											if ($conf->global->MARGIN_TYPE == 1 && is_numeric($TpriceInfos['id'])) {
+											if (getDolGlobalInt('MARGIN_TYPE') == 1 && is_numeric($TpriceInfos['id'])) {
 												$idSelected = $TpriceInfos['id'];
-											} elseif ($conf->global->MARGIN_TYPE === 'pmp') {
+											} elseif (getDolGlobalString('MARGIN_TYPE') === 'pmp') {
 												$idSelected = 'pmpprice';
-											} elseif ($conf->global->MARGIN_TYPE === 'costprice') {
+											} elseif (getDolGlobalString('MARGIN_TYPE') === 'costprice') {
 												$idSelected = 'costprice';
 											}
 										} else {
@@ -678,7 +677,7 @@ class AdvancedProductSearch
 										unset($this->searchSelectArray['pmpprice']);
 										unset($this->searchSelectArray['costprice']);
 										if (!empty($this->searchSelectArray)) {
-											if (count($this->searchSelectArray) == 1 && ($object->element !== 'supplier_proposal' || $conf->global->ADVANCED_PRODUCT_SEARCH_PRESELECT_IF_ONE_FOURN_PRICE_ON_SUPPLIER_PROPOSAL)) {
+											if (count($this->searchSelectArray) == 1 && ($object->element !== 'supplier_proposal' || getDolGlobalString('ADVANCED_PRODUCT_SEARCH_PRESELECT_IF_ONE_FOURN_PRICE_ON_SUPPLIER_PROPOSAL'))) {
 												$idSelected = key($this->searchSelectArray);
 												$this->searchubprice = $this->searchSelectArray[$idSelected]['data-up'];
 												// Recalcul du subprice final
@@ -725,7 +724,7 @@ class AdvancedProductSearch
 
 							// FINAL SUBPRICE AFTER REDUCTION
 							$output .= '<td class="advanced-product-search-col --finalsubprice right" >';
-							$output .= '<span id="discount-prod-list-final-subprice-' . $product->id . '"  class="final-subpriceprice" >' . price(round($finalSubprice, $conf->global->MAIN_MAX_DECIMALS_UNIT)) . '</span> ' . $langs->trans("HT");
+							$output .= '<span id="discount-prod-list-final-subprice-' . $product->id . '"  class="final-subpriceprice" >' . price(round($finalSubprice, getDolGlobalString('MAIN_MAX_DECIMALS_UNIT'))) . '</span> ' . $langs->trans("HT");
 							$output .= '</td>';
 
 							// QTY
@@ -748,7 +747,7 @@ class AdvancedProductSearch
 							$output .= '</td>';
 
 							// UNITE
-							if (!empty($conf->global->PRODUCT_USE_UNITS)) {
+							if (!empty(getDolGlobalString('PRODUCT_USE_UNITS'))) {
 								$output .= '<td class="advanced-product-search-col --unit" >';
 								$output .= $product->getLabelOfUnit();
 								$output .= '</td>';
@@ -756,7 +755,7 @@ class AdvancedProductSearch
 
 							$output .= '<td class="advanced-product-search-col --finalprice right" >';
 							$finalPrice = $finalSubprice * $qty;
-							$output .= '<span id="discount-prod-list-final-price-' . $product->id . '"  class="final-price" >' . price(round($finalPrice, $conf->global->MAIN_MAX_DECIMALS_TOT)) . '</span> ' . $langs->trans("HT");
+							$output .= '<span id="discount-prod-list-final-price-' . $product->id . '"  class="final-price" >' . price(round($finalPrice,  getDolGlobalString('MAIN_MAX_DECIMALS_TOT'))) . '</span> ' . $langs->trans("HT");
 							$output .= '</td>';
 
 							$output .= '<td class="advanced-product-search-col --action" >';
@@ -1115,7 +1114,7 @@ class AdvancedProductSearch
 				$baseSubPrice = $product->price;
 			}
 
-			return round(floatval($baseSubPrice), $conf->global->MAIN_MAX_DECIMALS_UNIT);
+			return round(floatval($baseSubPrice), getDolGlobalString('MAIN_MAX_DECIMALS_UNIT'));
 		}
 
 		return false;
