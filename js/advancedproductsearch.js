@@ -122,7 +122,7 @@ jQuery(function ($) {
 		let element = $(this).attr('data-target-element');
 		let fk_element = $(this).attr('data-target-id');
 		let search_idprod = $('#search_idprod').val();
-
+		if (search_idprod === undefined) search_idprod = '';
 		let productSearchDialogBox = "product-search-dialog-box";
 		// crée le calque qui sera convertie en popup
 		$('body').append('<div id="'+productSearchDialogBox+'" title="' + AdvancedProductSearch.discountlang.SearchProduct + '"></div>');
