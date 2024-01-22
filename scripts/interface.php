@@ -118,7 +118,7 @@ if ($action === 'add-product') {
 								if ($fPrice['id'] === $fournPrice) { // === to be sure 1 != 'string'
 									if (is_numeric($fPrice['id'])){ $fk_fournprice = $fPrice['id']; }
 									$pa_ht = $fPrice['price'];
-									$ref_supplier = $fPrice['ref'];
+									$ref_supplier = $fPrice['ref'] ?? '';
 									$fourPriceKeyExist = true;
 									break;
 								}
