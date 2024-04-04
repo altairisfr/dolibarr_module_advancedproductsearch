@@ -303,17 +303,17 @@ class AdvancedProductSearch
 
 		// multilang
 		if (!empty(getDolGlobalString('MAIN_MULTILANGS'))){
-			$this->fieldsToSearchAll+= array('pl.label','pl.description','pl.note');
+			$this->fieldsToSearchAll+= array_merge($this->fieldsToSearchAll, array('pl.label','pl.description','pl.note'));
 		}
 
 		if (!empty($conf->barcode->enabled)) {
-			$this->fieldsToSearchAll+=  array('p.barcode','pfp.barcode');
+			$this->fieldsToSearchAll =  array_merge($this->fieldsToSearchAll, array('p.barcode','pfp.barcode'));
 			$this->fieldsToSearchAllText[]='Barcode';
 		}
 
 		// Filter on supplier
 		if (!empty($conf->fournisseur->enabled)){
-			$this->fieldsToSearchAll+=  array('pfp.ref_fourn');
+			$this->fieldsToSearchAll[] = 'pfp.ref_fourn';
 			$this->fieldsToSearchAllText[]='ProductRefFourn';
 		}
 
