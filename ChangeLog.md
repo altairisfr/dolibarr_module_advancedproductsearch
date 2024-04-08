@@ -6,6 +6,7 @@
 
 
 ## Release 1.5
+- FIX : Search all filter doesn't apply all filters - *04/04/2024* - 1.5.2  
 - FIX : "Undefined" dans champs de recherche - *22/01/2024* - 1.5.1  
 - NEW : Compat V19 et php 8.2 *04/12/2023* - 1.5.0  
     Changed Dolibarr compatibility range to 15 min - 19 max  
