@@ -78,8 +78,8 @@ if ($action === 'add-product') {
 		'commande' => $user->hasRight('commande', 'creer'),
 		'propal' => $user->hasRight('propal', 'creer'),
 		'facture' => $user->hasRight('facture', 'creer'),
-		'invoice_supplier' => $user->hasRight('fournisseur', 'creer'),
-		'order_supplier' => $user->hasRight('fournisseur', 'creer'),
+		'invoice_supplier' => $user->hasRight('fournisseur','facture', 'creer'),
+		'order_supplier' => $user->hasRight('fournisseur','commande', 'creer'),
 		'supplier_proposal' => $user->hasRight('supplier_proposal', 'creer'),
 	);
 
