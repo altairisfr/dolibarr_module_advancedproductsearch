@@ -61,7 +61,7 @@ FournPriceError = Erreur sur le prix fournisseur
 ErrrorRemiseMustBeAValidPercent = Erreur : la remise doit être une valeur comprise entre 0 et 100
 SearchRef = Référence recherchée
 SearchLabel = Libellé recherché
-NotEnoughRights = Cette action ne vous est pas authorisée
+NotEnoughRights = Cette action ne vous est pas autorisée
 ErrorMissingModuleDiscountRule = Erreur : le module règle de remise est installé mais semble supprimé
 FinalDiscountPrice = Prix final
 
