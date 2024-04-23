@@ -894,6 +894,7 @@ class AdvancedProductSearch extends CommonObject
 
 			// récupération du prix client
 			if ($societe) {
+				// DA024689 les niveaux de prix du produit ne remonte pas pour le tiers selectionné
 				$TSellPrice = $product->getSellPrice($mysoc,$societe);
 				if (!empty($TSellPrice)) {
 					$baseSubprice = $TSellPrice['pu_ht'];
