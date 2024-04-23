@@ -6,6 +6,14 @@
 class AdvancedProductSearch extends CommonObject
 {
 
+	/**
+	 * @var string[]
+	 */
+	public $supplierElements =  array(
+		'supplier_proposal',
+		'order_supplier',
+		'invoice_supplier'
+	);
 
 
 	/**
@@ -78,10 +86,11 @@ class AdvancedProductSearch extends CommonObject
 
 	/**
 	 * return an ajax ready search table for product
-	 *	@param	string			$pageUrl				Page URL (in most cases provided with $_SERVER["PHP_SELF"])
+	 * @param string $pageUrl Page URL (in most cases provided with $_SERVER["PHP_SELF"])
+	 * @param bool $isSupplier
 	 * @return string
 	 */
-	public static function advancedProductSearchForm($pageUrl = ''){
+	public static function advancedProductSearchForm($pageUrl = '', $isSupplier = false) {
 		global $langs, $conf, $db, $action;
 
 		$output = '';
@@ -184,6 +193,7 @@ class AdvancedProductSearch extends CommonObject
 
 		// List of fields to search into when doing a "search in all"
 		$fieldstosearchall = array('p.ref','p.label','p.description',"p.note");
+		$fieldstosearchallText =array('Ref', 'Label', 'Description', 'Note');
 
 		// multilang
 		if (!empty($conf->global->MAIN_MULTILANGS)){
@@ -192,11 +202,13 @@ class AdvancedProductSearch extends CommonObject
 
 		if (!empty($conf->barcode->enabled)) {
 			$fieldstosearchall+=  array('p.barcode','pfp.barcode');
+			$fieldstosearchallText[]='Barcode';
 		}
 
 		// Filter on supplier
 		if (!empty($conf->fournisseur->enabled)){
 			$fieldstosearchall+=  array('pfp.ref_fourn');
+			$fieldstosearchallText[]='ProductRefFourn';
 		}
 
 		// SELECT PART
@@ -290,7 +302,15 @@ class AdvancedProductSearch extends CommonObject
 		}
 
 		$morehtmlcenter= '<div class="advanced-product-global-search-container" >';
+
+		foreach ($fieldstosearchallText as $i => $langKey){
+			$fieldstosearchallText[$i] = $langs->trans($langKey);
+		}
+		$toolTip = $langs->trans('SearchWillBeOnTheseFields', '<br/>' . implode(', ' , $fieldstosearchallText));
+
+
 		$morehtmlcenter.= '<input name="sall" value="'.dol_htmlentities($sall).'" id="search-all-form-input" class="advanced-product-global-search-input" placeholder="'.$langs->trans('Search').'" autocomplete="off">';
+		$morehtmlcenter.= '<i title="'.dol_escape_htmltag($toolTip).'" class="fa fa-question-circle classfortooltip"></i>';
 		$morehtmlcenter.= '</div>';
 
 		$picto = 'product';
@@ -338,7 +358,7 @@ class AdvancedProductSearch extends CommonObject
 			$categoriesProductArr = $form->select_all_categories(Categorie::TYPE_PRODUCT, '', '', 64, 0, 1);
 			$categoriesProductArr[-2] = '- '.$langs->trans('NotCategorized').' -';
 			$moreforfilter .= Form::multiselectarray('search_category_product_list', $categoriesProductArr, $searchCategoryProductList, 0, 0, 'minwidth300');
-			$moreforfilter .= ' <input type="checkbox" class="valignmiddle" name="search_category_product_operator" value="1"'.($searchCategoryProductOperator == 1 ? ' checked="checked"' : '').'/> '.$langs->trans('UseOrOperatorForCategories');
+			$moreforfilter .= ' <label><input type="checkbox" class="valignmiddle" name="search_category_product_operator" value="1"'.($searchCategoryProductOperator == 1 ? ' checked="checked"' : '').'/> '.$langs->trans('UseOrOperatorForCategories').'</label>';
 			$moreforfilter .= '</div>';
 		}
 
@@ -419,7 +439,7 @@ class AdvancedProductSearch extends CommonObject
 
 		if ($conf->fournisseur->enabled) {
 			$colnumber++;
-			$output .= '	<th class="advanced-product-search-col --buy-price" >' . $langs->trans('BuyPrice') . '</th>';
+			$output .= '	<th class="advanced-product-search-col --buy-price" >' . ($isSupplier ? $langs->trans('PredefinedFournPricesForFill').img_help(1, $langs->trans('PredefinedFournPricesForFillHelp')) : $langs->trans('BuyPrice')) . '</th>';
 		}
 		$output.= '	<th class="advanced-product-search-col --subprice" >'.$langs->trans('Price').'</th>';
 		$output.= '	<th class="advanced-product-search-col --discount" >'.$langs->trans('Discount').'</th>';
@@ -464,15 +484,21 @@ class AdvancedProductSearch extends CommonObject
 
 						// Réduction par défaut du client
 						$reduction = doubleval($object->thirdparty->remise_percent);
+						if($isSupplier) {
+							$reduction = doubleval($object->thirdparty->remise_supplier_percent);
+						}
 
 						// Prix unitaire du produit avec prise en compte des niveau de prix et du client
 						$subprice = self::getProductSellPrice($product->id, $fk_company);
+						if($isSupplier) {
+							$subprice = 0;
+						}
 
 						// calcule du prix unitaire final apres réduction
 						$finalSubprice = $subprice - $subprice*$reduction/100;
 
 						// COMPTATIBILITE MODULE DISCOUNT RULE : RECHERCHE DE REGLE DE TARIFICATION
-						if (!empty($conf->discountrules->enabled)){
+						if (!empty($conf->discountrules->enabled) && !$isSupplier){
 							if(!class_exists('DiscountSearch')){ dol_include_once('/discountrules/class/discountSearch.class.php'); }
 							if(class_exists('DiscountSearch')) { // Il est possible que le module soit supprimé mais pas désinstallé
 								$discountSearch = new DiscountSearch($db);
@@ -506,31 +532,52 @@ class AdvancedProductSearch extends CommonObject
 
 						if ($conf->fournisseur->enabled) {
 							$output .= '<td class="advanced-product-search-col --buy-price" >';
-							$TFournPriceList = self::getFournPriceList($product->id);
+							$TFournPriceList = self::getFournPriceList($product->id, $isSupplier ? $object->socid : 0);
 							if (!empty($TFournPriceList)) {
 //						$output.= '<div class="default-visible" >'.price($product->pmp).'</div>';
 //						$output.= '<div class="default-hidden" >';
 
 								$selectArray = array();
 								$idSelected = '';
+
 								foreach ($TFournPriceList as $TpriceInfos) {
-									$selectArray[$TpriceInfos['id']] = $TpriceInfos['label'];
+									$selectArray[$TpriceInfos['id']] = array(
+																				'label'=>$TpriceInfos['label'],
+																				'data-up'=>$TpriceInfos['price']
+																			);
 									if ($TpriceInfos['id'] == 'pmpprice' && !empty($TpriceInfos['price'])) {
 										$idSelected = 'pmpprice';
+									}
+								}
+
+								if($isSupplier) { // Seuls les prix fournisseurs nous intéressent dans le cadre d'un document fournisseur (pas de PMP ou autre dans ce cas)
+									unset($selectArray['pmpprice']);
+									unset($selectArray['costprice']);
+									if(!empty($selectArray)) {
+										if(count($selectArray) == 1 && ($object->element !== 'supplier_proposal' || $conf->global->ADVANCED_PRODUCT_SEARCH_PRESELECT_IF_ONE_FOURN_PRICE_ON_SUPPLIER_PROPOSAL)) {
+											$idSelected = key($selectArray);
+											$subprice = $selectArray[$idSelected]['data-up'];
+											// Recalcul du subprice final
+											$finalSubprice = $subprice - $subprice*$reduction/100;
+										}
+										// On insère une valeur vide, car si plusieurs prix fourn, on laisse le choix à l'utilisateur de sélectionner celui qu'il souhaite
+										$selectArray[0] = array('data-up' => 0);
 									}
 								}
 
 
 								$key_in_label = 0;
 								$value_as_key = 0;
-								$moreparam = '';
+								$moreparam = 'data-product="'.$product->id.'"';
 								$translate = 0;
 								$maxlen = 0;
 								$disabled = 0;
-								$sort = '';
+								if($isSupplier) $sort = 'ASC';
 								$morecss = 'search-list-select';
 								$addjscombo = 0;
-								$output .= $form->selectArray('prodfourprice-' . $product->id, $selectArray, $idSelected, 0, $key_in_label, $value_as_key, $moreparam, $translate, $maxlen, $disabled, $sort, $morecss, $addjscombo);
+								if(!empty($selectArray)) {
+									$output .= $form->selectArray('prodfourprice-' . $product->id, $selectArray, $idSelected, 0, $key_in_label, $value_as_key, $moreparam, $translate, $maxlen, $disabled, $sort, $morecss, $addjscombo);
+								}
 //						$output.= '</div>';
 							} else {
 								$output .= price($product->pmp);
@@ -708,9 +755,6 @@ class AdvancedProductSearch extends CommonObject
 		elseif ($objecttype == 'propal')  {
 			$classpath = 'comm/propal/class';
 		}
-		elseif ($objecttype == 'supplier_proposal')  {
-			$classpath = 'supplier_proposal/class';
-		}
 		elseif ($objecttype == 'shipping') {
 			$classpath = 'expedition/class';
 			$myobject = 'expedition';
@@ -778,6 +822,12 @@ class AdvancedProductSearch extends CommonObject
 			$classpath = 'fourn/class';
 			$module = 'fournisseur';
 		}
+		elseif ($objecttype == 'supplier_proposal') {
+			$classpath = 'supplier_proposal/class';
+			$classfile = 'supplier_proposal';
+			$classname = 'SupplierProposal';
+			$module = 'supplier_proposal';
+		}
 		elseif ($objecttype == 'stock') {
 			$classpath = 'product/stock/class';
 			$classfile = 'entrepot';
@@ -814,7 +864,7 @@ class AdvancedProductSearch extends CommonObject
 	 *            'title' 	=> (string) a short label
 	 *         ]
 	 */
-	public static function getFournPriceList($idprod){
+	public static function getFournPriceList($idprod, $id_fourn=0){
 		global $db, $langs, $conf;
 		$prices = array();
 
@@ -830,7 +880,7 @@ class AdvancedProductSearch extends CommonObject
 			$sorttouse = 's.nom, pfp.quantity, pfp.price';
 			if (GETPOST('bestpricefirst')) $sorttouse = 'pfp.unitprice, s.nom, pfp.quantity, pfp.price';
 
-			$productSupplierArray = $producttmp->list_product_fournisseur_price($idprod, $sorttouse); // We list all price per supplier, and then firstly with the lower quantity. So we can choose first one with enough quantity into list.
+			$productSupplierArray = $producttmp->list_product_fournisseur_price($idprod, $sorttouse, '', 0, 0, $id_fourn); // We list all price per supplier, and then firstly with the lower quantity. So we can choose first one with enough quantity into list.
 			if (is_array($productSupplierArray))
 			{
 				foreach ($productSupplierArray as $productSupplier)
@@ -856,7 +906,7 @@ class AdvancedProductSearch extends CommonObject
 					$label = price($price, 0, $langs, 0, 0, -1, $conf->currency)."/".$langs->trans("Unit");
 					if ($productSupplier->fourn_ref) $label .= ' ('.$productSupplier->fourn_ref.')';
 
-					$prices[] = array("id" => $productSupplier->product_fourn_price_id, "price" => price2num($price, 0, '', 0), "label" => $label, "title" => $title); // For price field, we must use price2num(), for label or title, price()
+					$prices[] = array("id" => $productSupplier->product_fourn_price_id, "price" => price2num($price, 0, '', 0), "label" => $label, "title" => $title, 'ref' => $productSupplier->fourn_ref); // For price field, we must use price2num(), for label or title, price()
 				}
 			}
 
@@ -896,6 +946,7 @@ class AdvancedProductSearch extends CommonObject
 			if ($societe) {
 				// DA024689 les niveaux de prix du produit ne remonte pas pour le tiers selectionné
 				$TSellPrice = $product->getSellPrice($mysoc,$societe);
+
 				if (!empty($TSellPrice)) {
 					$baseSubprice = $TSellPrice['pu_ht'];
 				}
@@ -931,7 +982,7 @@ class AdvancedProductSearch extends CommonObject
 		return preg_replace("/($needle)/iu", sprintf('<span style="background-color: %s; color:%s;">$1</span>', $backgroundColor, $color), $haystack);
 	}
 
-	function highlightWordsOfSearchQuery( $content, $searchQuery) {
+	public function highlightWordsOfSearchQuery( $content, $searchQuery) {
 
 		$words = explode(' ', $searchQuery);
 		$words = array_unique($words);
