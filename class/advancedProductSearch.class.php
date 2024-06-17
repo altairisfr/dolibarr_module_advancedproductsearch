@@ -116,7 +116,7 @@ class AdvancedProductSearch
 	 * @return Product
 	 */
 	static function getProductCache($fk_product, $forceFetch = false){
-		global $db, $advencedProductSearchProductCache;
+		global $db, $advencedProductSearchProductCache, $langs;
 
 		if(!class_exists('Product')){
 			require_once DOL_DOCUMENT_ROOT . '/product/class/product.class.php';
@@ -133,6 +133,19 @@ class AdvancedProductSearch
 			$product = new Product($db);
 			$res = $product->fetch($fk_product);
 			if($res>0){
+				if (empty($conf->global->MAIN_PRODUCT_DISABLE_CUSTOMCOUNTRYCODE)
+					&& (!empty($product->customcode) || !empty($product->country_code))) {
+					$langs->load("products");
+					$desc_tmp =
+						'(' .
+						$langs->transnoentitiesnoconv("CustomCode").': '.
+						$product->customcode .
+						' - ' .
+						$langs->transnoentitiesnoconv("CountryOrigin").': '.
+						getCountry($product->country_code, 0, $db, $langs, 0) .
+						 ')';
+					$product->description = dol_concatdesc($product->description, $desc_tmp);
+				}
 				$advencedProductSearchProductCache[$fk_product] = $product;
 				return $advencedProductSearchProductCache[$fk_product];
 			}
