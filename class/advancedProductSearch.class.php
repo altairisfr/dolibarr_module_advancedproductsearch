@@ -133,19 +133,6 @@ class AdvancedProductSearch
 			$product = new Product($db);
 			$res = $product->fetch($fk_product);
 			if($res>0){
-				if (empty($conf->global->MAIN_PRODUCT_DISABLE_CUSTOMCOUNTRYCODE)
-					&& (!empty($product->customcode) || !empty($product->country_code))) {
-					$langs->load("products");
-					$desc_tmp =
-						'(' .
-						$langs->transnoentitiesnoconv("CustomCode").': '.
-						$product->customcode .
-						' - ' .
-						$langs->transnoentitiesnoconv("CountryOrigin").': '.
-						getCountry($product->country_code, 0, $db, $langs, 0) .
-						 ')';
-					$product->description = dol_concatdesc($product->description, $desc_tmp);
-				}
 				$advencedProductSearchProductCache[$fk_product] = $product;
 				return $advencedProductSearchProductCache[$fk_product];
 			}
@@ -1163,6 +1150,40 @@ class AdvancedProductSearch
 		}
 
 		return $content; // return highlighted data
+	}
+
+	/**
+	 * get final product description by adding custom code and country of origin if applicable.
+	 *
+	 * This function return the product description by appending the custom code and country of origin
+	 * if the global configuration allows it and the product has these attributes.
+	 *
+	 * @global object $langs  The language object for translations.
+	 * @global object $db     The database object.
+	 * @param object $product The product object which contains the description, custom code, and country code.
+	 * @return string The modified product description.
+	 */
+	public static function getFinalProductDescriptionForLine($product)
+	{
+		global $langs, $db;
+
+		$desc = $product->description;
+		if (empty($conf->global->MAIN_PRODUCT_DISABLE_CUSTOMCOUNTRYCODE)
+			&& (!empty($product->customcode) || !empty($product->country_code))) {
+
+			$langs->load("products");
+
+			$desc_tmp = '(' .
+				$langs->transnoentitiesnoconv("CustomCode") . ': ' .
+				$product->customcode . ' - ' .
+				$langs->transnoentitiesnoconv("CountryOrigin") . ': ' .
+				getCountry($product->country_code, 0, $db, $langs, 0) .
+				')';
+
+			$desc = dol_concatdesc($desc, $desc_tmp);
+		}
+
+		return $desc;
 	}
 
 }
