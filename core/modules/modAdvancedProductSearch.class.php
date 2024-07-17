@@ -155,7 +155,7 @@ class modAdvancedProductSearch extends DolibarrModules
 
 		$this->const = array();
 
-		if (!isset($conf->advancedproductsearch) || !isset($conf->advancedproductsearch->enabled)) {
+		if (!isset($conf->advancedproductsearch) || !isModEnabled('advancedproductsearch')) {
 			$conf->advancedproductsearch = new stdClass();
 			$conf->advancedproductsearch->enabled = 0;
 		}
