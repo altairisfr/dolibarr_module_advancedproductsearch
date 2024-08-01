@@ -49,7 +49,7 @@ $langs->loadLangs(array("advancedproductsearch@advancedproductsearch", "other", 
 $action = GETPOST('action');
 
 // Security check
-if (empty($conf->advancedproductsearch->enabled)) accessforbidden('Module not enabled');
+if (!isModEnabled('advancedproductsearch')) accessforbidden('Module not enabled');
 
 
 // AJOUT DE LIGNE DANS LES DOCUMENTS
@@ -105,7 +105,7 @@ if ($action === 'add-product') {
 					$fk_fournprice = null;
 					$pa_ht = $product->pmp;
 
-					if (!empty($conf->fournisseur->enabled)) {
+					if (isModEnabled('fournisseur')) {
 						$TFournPriceList = AdvancedProductSearch::getFournPriceList($product->id);
 						if (!empty($TFournPriceList) && !empty($fournPrice)) {
 							if (is_numeric($fournPrice)) { $fournPrice = intval($fournPrice); }

@@ -244,7 +244,7 @@ if ($action == 'edit') {
 				print "</textarea>\n";
 			} elseif ($val['type']== 'html') {
 				require_once DOL_DOCUMENT_ROOT . '/core/class/doleditor.class.php';
-				$doleditor = new DolEditor($constname, getDolGlobalString($constname), '', 160, 'dolibarr_notes', '', false, false, $conf->fckeditor->enabled, ROWS_5, '90%');
+				$doleditor = new DolEditor($constname, getDolGlobalString($constname), '', 160, 'dolibarr_notes', '', false, false, isModEnabled('fckeditor'), ROWS_5, '90%');
 				$doleditor->Create();
 			} elseif ($val['type'] == 'yesno') {
 				print $form->selectyesno($constname, getDolGlobalString($constname), 1);
@@ -301,12 +301,12 @@ if ($action == 'edit') {
 					print '</script>';
 				}
 			} elseif ($val['type'] == 'product') {
-				if (!empty($conf->product->enabled) || !empty($conf->service->enabled)) {
+				if (isModEnabled('product') || isModEnabled('service')) {
 					$selected = (empty(getDolGlobalString($constname)) ? '' : getDolGlobalString($constname));
 					$form->select_produits($selected, $constname, '', 0);
 				}
 			} else {
-				print '<input name="'.$constname.'"  class="flat '.(empty($val['css']) ? 'minwidth200' : $val['css']).'" value="'. {$constname}.'">';
+				print '<input name="'.$constname.'"  class="flat '.(empty($val['css']) ? 'minwidth200' : $val['css']).'" value="'.$constname.'">';
 			}
 			print '</td></tr>';
 		}
