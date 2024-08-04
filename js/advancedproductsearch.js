@@ -121,6 +121,7 @@ jQuery(function ($) {
 
 		let element = $(this).attr('data-target-element');
 		let fk_element = $(this).attr('data-target-id');
+		let token = $(this).closest('form').find('input[name=token]').val();
 		let search_idprod = $('#search_idprod').val();
 		if (search_idprod === undefined) search_idprod = '';
 		let productSearchDialogBox = "product-search-dialog-box";
@@ -161,6 +162,7 @@ jQuery(function ($) {
 				//$(this).dialog('option', 'maxHeight', $(window).height()-30);
 				AdvancedProductSearch.element = element;
 				AdvancedProductSearch.fk_element = fk_element;
+				AdvancedProductSearch.newToken = token;
 
 				AdvancedProductSearch.discountLoadSearchProductDialogForm("&element="+element+"&fk_element="+fk_element+"&displayResults=0&sall=" + search_idprod, true);
 				$('#'+productSearchDialogBox).parent().css('z-index', 1002);
@@ -223,7 +225,6 @@ AdvancedProductSearch = {};
 	o.newToken = '';
 
 	o.productSearchDialogBox = "product-search-dialog-box";
-	o.productSearchDialogButton = "product-search-dialog-button";
 
 	// lang par défaut, les valeurs son ecrasées lors du chargement de la page en fonction de la langue
 	o.discountlang = {
@@ -263,8 +264,6 @@ AdvancedProductSearch = {};
 
 		$('#'+o.productSearchDialogBox).prepend($('<div class="inner-dialog-overlay"><div class="dialog-loading__loading"><div class="dialog-loading__spinner-wrapper"><span class="dialog-loading__spinner-text">LOADING</span><span class="dialog-loading__spinner"></span></div></div></div>'));
 
-		o.GetNewToken();
-
 		$('#'+o.productSearchDialogBox).load( o.config.interface_url + '?action=product-search-form&token=' + o.newToken + morefilters, function() {
 			o.dialogCountAddedProduct = 0; // init count of product added for reload action
 			if(focus){
@@ -281,23 +280,6 @@ AdvancedProductSearch = {};
 			o.initToolTip($('#'+o.productSearchDialogBox+' .classfortooltip')); // restore tooltip after ajax call
 			$('#'+o.productSearchDialogBox).removeClass('--ajax-loading');
 		});
-	}
-
-	/**
-	 * Get new token
-	 */
-	o.GetNewToken = function (){
-		// On a besoin d'un token externe à l'interface pour l'appeler quand MAIN_SECURITY_CSRF_WITH_TOKEN = 3
-		// On récupère le token depuis le formulaire dans lequel est le bouton de recherche
-		if($('#'+o.productSearchDialogButton).closest('form').find('input[name=token]').length > 0){
-			o.newToken = $('#'+o.productSearchDialogButton).closest('form').find('input[name=token]').val();
-			return;
-		}
-
-		// S'il n'a pas été trouvé, on récupère le token depuis les autres formulaires de la page
-		if ($('form').find('input[name=token]')) {
-			o.newToken = $('form').find('input[name=token]').val();
-		}
 	}
 
 
