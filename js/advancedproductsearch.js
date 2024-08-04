@@ -223,6 +223,7 @@ AdvancedProductSearch = {};
 	o.newToken = '';
 
 	o.productSearchDialogBox = "product-search-dialog-box";
+	o.productSearchDialogButton = "product-search-dialog-button";
 
 	// lang par défaut, les valeurs son ecrasées lors du chargement de la page en fonction de la langue
 	o.discountlang = {
@@ -262,13 +263,13 @@ AdvancedProductSearch = {};
 
 		$('#'+o.productSearchDialogBox).prepend($('<div class="inner-dialog-overlay"><div class="dialog-loading__loading"><div class="dialog-loading__spinner-wrapper"><span class="dialog-loading__spinner-text">LOADING</span><span class="dialog-loading__spinner"></span></div></div></div>'));
 
-		$('#'+o.productSearchDialogBox).load( o.config.interface_url + '?action=product-search-form' + morefilters, function() {
+		o.GetNewToken();
+
+		$('#'+o.productSearchDialogBox).load( o.config.interface_url + '?action=product-search-form&token=' + o.newToken + morefilters, function() {
 			o.dialogCountAddedProduct = 0; // init count of product added for reload action
 			if(focus){
 				o.focusAtEndSearchInput($("#search-all-form-input"));
 			}
-
-			o.GetNewToken();
 
 			if($('#'+o.productSearchDialogBox).outerHeight() >= $( window ).height()-150 ){
 				$('#'+o.productSearchDialogBox).dialog( "option", "position", { my: "top", at: "top", of: window } ); // Hack to position the dialog box after ajax load
@@ -286,8 +287,16 @@ AdvancedProductSearch = {};
 	 * Get new token
 	 */
 	o.GetNewToken = function (){
-		if($('#'+o.productSearchDialogBox + ' input[name=token]').length > 0){
-			o.newToken = $('#'+o.productSearchDialogBox + ' input[name=token]').val();
+		// On a besoin d'un token externe à l'interface pour l'appeler quand MAIN_SECURITY_CSRF_WITH_TOKEN = 3
+		// On récupère le token depuis le formulaire dans lequel est le bouton de recherche
+		if($('#'+o.productSearchDialogButton).closest('form').find('input[name=token]').length > 0){
+			o.newToken = $('#'+o.productSearchDialogButton).closest('form').find('input[name=token]').val();
+			return;
+		}
+
+		// S'il n'a pas été trouvé, on récupère le token depuis les autres formulaires de la page
+		if ($('form').find('input[name=token]')) {
+			o.newToken = $('form').find('input[name=token]').val();
 		}
 	}
 
