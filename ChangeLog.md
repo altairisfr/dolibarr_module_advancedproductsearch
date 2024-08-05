@@ -5,6 +5,11 @@
 
 
 
+## Release 1.6
+
+- FIX : Compat v20
+  Changed Dolibarr compatibility range to 16 min - 20 max - *01/08/2024* - 1.6.0
+
 ## Release 1.5
 - FIX : Rend le code propre du FIX 1.5.4 - *19/06/2024* - 1.5.5
 - FIX : DA025087 - L'origine et la nomenclature douanière du produit ne sont pas ajoutés à la description - *17/06/2024* - 1.5.4
