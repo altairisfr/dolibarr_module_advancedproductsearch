@@ -7,6 +7,7 @@
 
 ## Release 1.6
 
+- FIX : Forgot to remove a js call to getnewtoken during compat - *20/08/2024* - 1.6.1
 - FIX : Compat v20
   Changed Dolibarr compatibility range to 16 min - 20 max - *01/08/2024* - 1.6.0
 
@@ -26,7 +27,7 @@
 
 - FIX : PHP 8 - *08/08/2022* - 1.3.4
 - FIX : Compatibilité V16 - *13/06/2022* - 1.3.3
-- FIX: Minimum quantity apply - *29/04/2022* - 1.3.2
+- FIX : Minimum quantity apply - *29/04/2022* - 1.3.2
 - FIX : Token transfert in js - *24/03/2022* - 1.3.1
 - FIX : js file doesn't need to be PHP file - *03/02/2022* - 1.3.0
 - FIX : css file doesn't need to be PHP file - *25/01/2022* - 1.2.0
@@ -42,5 +43,5 @@
 ## Release 1.0
 
 - FIX : We can't add products or services after pop-in page change - *2022-01-20* - 1.0.2
-- FIX: signature for `addline` not consistent across objects (proposal, order, invoice) - *08/10/2021* - 1.0.1
+- FIX : signature for `addline` not consistent across objects (proposal, order, invoice) - *08/10/2021* - 1.0.1
 - Initial version
