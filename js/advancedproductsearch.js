@@ -457,8 +457,6 @@ AdvancedProductSearch = {};
 
 		o.initCurrentDocumentObjectVarsFromForm();
 
-		o.GetNewToken();
-
 		var sendData = {
 			'action': "add-product",
 			'fk_product': fk_product,
