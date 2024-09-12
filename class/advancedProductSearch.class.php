@@ -586,7 +586,9 @@ class AdvancedProductSearch
 		}
 
 		// Hook fields
-		$hookmanager->executeHooks('printFieldListTitle', $hooksParameters, $object, $action); // Note that $action and $object may have been modified by hook
+		$hookParam = $hooksParameters;
+		$hookParam['colNumber']=& $colNumber;
+		$hookmanager->executeHooks('printFieldListTitle', $hookParam, $object, $action); // Note that $action and $object may have been modified by hook
 		$output .= $hookmanager->resPrint;
 
 		if (isModEnabled('fournisseur')) {
