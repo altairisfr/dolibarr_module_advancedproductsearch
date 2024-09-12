@@ -277,16 +277,28 @@ class AdvancedProductSearch
 		$form = new Form($db);
 
 
-
+		$currentQtyByProduct = array();
 		$object = self::objectAutoLoad($this->search['element'], $db);
 		if($object > 0){
-			if($object->fetch($this->search['fk_element'])){
+			if($object->fetch($this->search['fk_element'])) {
 				$object->fetch_thirdparty();
-				if($object->socid>0){
+				if ($object->socid > 0) {
 					$this->search['fk_company'] = $object->socid;
 				}
-				if($object->fk_project>0){
+				if ($object->fk_project > 0) {
 					$this->search['fk_project'] = $object->fk_project;
+				}
+
+				if (!empty($object->lines)) {
+					foreach ($object->lines as $objLines){
+						/** @var OrderLine $objLines */
+						if($objLines->fk_product > 0){
+							if(!array_key_exists($objLines->fk_product, $currentQtyByProduct)){
+								$currentQtyByProduct[$objLines->fk_product] = 0;
+							}
+							$currentQtyByProduct[$objLines->fk_product]+= $objLines->qty;
+						}
+					}
 				}
 			}
 		}
@@ -727,7 +739,7 @@ class AdvancedProductSearch
 							$output .= '</td>';
 
 							// QTY
-							$output .= '<td class="advanced-product-search-col --qty" >';
+							$output .= '<td class="advanced-product-search-col --qty nowrap" >';
 							$qty = 1;
 							$qtyMin = 0;
 
@@ -741,6 +753,17 @@ class AdvancedProductSearch
 							if ($qtyMin > $qty) {
 								$qty = $qtyMin;
 							}
+
+							$output .= dolGetBadge('', $currentQtyByProduct[$product->id] ?? '','primary', '', '',
+								[
+									'attr'=>
+										[
+											'class' => 'advanced-product-search__badge-qty-doc',
+											'data-product' => $product->id,
+											'title' => $langs->trans('QtyAlreadyInDoc')
+										]
+								]
+							);
 
 							$output .= '<input id="advanced-product-search-list-input-qty-' . $product->id . '"  data-product="' . $product->id . '"  class="advanced-product-search-list-input-qty center on-update-calc-prices" type="number" step="any" min="' . $qtyMin . '" maxlength="8" size="3" value="' . $qty . '" placeholder="x" name="prodqty[' . $product->id . ']" />';
 							$output .= '</td>';

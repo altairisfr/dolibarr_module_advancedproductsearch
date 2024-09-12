@@ -3,6 +3,7 @@
 
 # NOT RELEASED
 
+- NEW : Display qty of current document  - *12/09/2024* - 1.8.0
 - NEW : Setup conf for default search behavior  - *12/09/2024* - 1.7.0
 
 ## Release 1.6
