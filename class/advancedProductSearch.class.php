@@ -70,7 +70,6 @@ class AdvancedProductSearch
 	 *
 	 */
 	public function __construct(){
-
 		$this->setSearchParamDefaultValues();
 	}
 

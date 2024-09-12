@@ -164,7 +164,7 @@ jQuery(function ($) {
 				AdvancedProductSearch.fk_element = fk_element;
 				AdvancedProductSearch.newToken = token;
 
-				let displayResult = search_idprod.length > 0 ? 1 : 0;
+				let displayResult = search_idprod.length > 0 ? 1 : AdvancedProductSearch.config.displayResultsOnOpen;
 				AdvancedProductSearch.discountLoadSearchProductDialogForm('&element=' + element + '&fk_element=' + fk_element + '&displayResults=' + displayResult + '&sall=' + search_idprod, true);
 				$('#'+productSearchDialogBox).parent().css('z-index', 1002);
 				$('.ui-widget-overlay').css('z-index', 1001);
@@ -242,6 +242,7 @@ AdvancedProductSearch = {};
 		"MAIN_MAX_DECIMALS_UNIT":5,
 		"interface_url":"advancedproductsearch\/scripts\/interface.php",
 		"js_url":"advancedproductsearch\/js\/advancedproductsearch.js",
+		'displayResultsOnOpen': 0,
 		"supplierElements":[
 			"supplier_proposal",
 			"order_supplier",

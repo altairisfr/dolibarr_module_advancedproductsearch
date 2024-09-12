@@ -131,7 +131,7 @@ class modAdvancedProductSearch extends DolibarrModules
 		$this->dirs = array("/advancedproductsearch/temp");
 
 		// Config pages. Put here list of php page, stored into advancedproductsearch/admin directory, to use to setup module.
-		$this->config_page_url = array();//"setup.php@advancedproductsearch"
+		$this->config_page_url = array("setup.php@advancedproductsearch");
 
 		// Dependencies
 		// A condition to hide module
