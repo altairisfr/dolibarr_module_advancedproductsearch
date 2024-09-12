@@ -257,7 +257,13 @@ class AdvancedProductSearch
 	 * @return string
 	 */
 	public function advancedProductSearchForm($isSupplier = false) {
-		global $langs, $conf, $db, $action;
+		global $langs, $db, $action,$hookmanager;
+
+		$hooksParameters = array(
+			'obj' => false,
+			'arrayfields' => array(), // to avoid other modules hook errors
+		);
+		$hookmanager->initHooks(array('adpsproductservicelist'));
 
 		$output = '';
 
@@ -288,6 +294,8 @@ class AdvancedProductSearch
 				if ($object->fk_project > 0) {
 					$this->search['fk_project'] = $object->fk_project;
 				}
+
+				$hooksParameters['obj'] = $object;
 
 				if (!empty($object->lines)) {
 					foreach ($object->lines as $objLines){
@@ -332,6 +340,12 @@ class AdvancedProductSearch
 		$this->searchSqlSelect = ' DISTINCT p.rowid, p.ref, p.label ';
 		if (!empty(getDolGlobalString('PRODUCT_USE_UNITS')))   $this->searchSqlSelect .= ' ,cu.label as cu_label';
 
+		// Add fields from hooks
+		$hookmanager->executeHooks('printFieldListSelect', $hooksParameters, $this, $action); // Note that $action and $object may have been modified by hook
+		$this->searchSqlSelect .= $hookmanager->resPrint;
+		$this->searchSqlSelect = preg_replace('/,\s*$/', '', $this->searchSqlSelect);
+
+
 		// SELECT COUNT PART
 		$this->searchSqlSelectCount = ' COUNT(DISTINCT p.rowid) as nb_results ';
 
@@ -341,6 +355,10 @@ class AdvancedProductSearch
 		// multilang
 		if (!empty(getDolGlobalString('MAIN_MULTILANGS'))) $this->searchSql .= " LEFT JOIN ".MAIN_DB_PREFIX."product_lang as pl ON (pl.fk_product = p.rowid AND pl.lang = '".$langs->getDefaultLang()."' )";
 		if (!empty(getDolGlobalString('PRODUCT_USE_UNITS')))   $this->searchSql .= " LEFT JOIN ".MAIN_DB_PREFIX."c_units cu ON (cu.rowid = p.fk_unit)";
+
+		// Add table from hooks
+		$hookmanager->executeHooks('printFieldListFrom', $hooksParameters, $object, $action); // Note that $action and $object may have been modified by hook
+		$this->searchSql.= $hookmanager->resPrint;
 
 		$this->searchSql .= ' WHERE p.entity IN ('.getEntity('product').')';
 		if (isset($this->search['search_tosell']) && dol_strlen($this->search['search_tosell']) > 0 && $this->search['search_tosell'] != -1) $this->searchSql .= " AND p.tosell = ".((int) $this->search['search_tosell']);
@@ -390,6 +408,10 @@ class AdvancedProductSearch
 			}
 		}
 		if ($this->search['fourn_id'] > 0)  $this->searchSql .= " AND pfp.fk_soc = ".((int) $this->search['fourn_id']);
+
+		$hookmanager->executeHooks('printFieldListWhere', $hooksParameters, $object, $action); // Note that $action and $object may have been modified by hook
+		$this->searchSql .= $hookmanager->resPrint;
+
 
 		$output.= '<form id="product-search-dialog-form" class="--blur-on-loading" >';
 
@@ -485,10 +507,9 @@ class AdvancedProductSearch
 			$moreForFilter .= '</div>';
 		}
 
-//	$parameters = array();
-//	$reshook = $hookmanager->executeHooks('printFieldPreListTitle', $parameters); // Note that $action and $object may have been modified by hook
-//	if (empty($reshook)) $moreForFilter .= $hookmanager->resPrint;
-//	else $moreForFilter = $hookmanager->resPrint;
+		$resHook = $hookmanager->executeHooks('printFieldPreListTitle', $hooksParameters); // Note that $action and $object may have been modified by hook
+		if (empty($resHook)) $moreForFilter .= $hookmanager->resPrint;
+		else $moreForFilter = $hookmanager->resPrint;
 
 		if ($moreForFilter)
 		{
@@ -517,6 +538,10 @@ class AdvancedProductSearch
 			$output.= '	<th class="advanced-product-search-col --stock-reel center" ></th>';
 			$output.= '	<th class="advanced-product-search-col --stock-theorique center" ></th>';
 		}
+
+		// Fields from hook
+		$hookmanager->executeHooks('printFieldListOption', $hooksParameters, $object, $action); // Note that $action and $object may have been modified by hook
+		$output .= $hookmanager->resPrint;
 
 		if (isModEnabled('fournisseur')) {
 			$output .= '	<th class="advanced-product-search-col --buy-price" ></th>';
@@ -559,6 +584,11 @@ class AdvancedProductSearch
 			$output.= '	<th class="advanced-product-search-col --stock-theorique center" >'.$langs->trans('VirtualStock').'</th>';
 			$colNumber+=2;
 		}
+
+		// Hook fields
+		$hookmanager->executeHooks('printFieldListTitle', $hooksParameters, $object, $action); // Note that $action and $object may have been modified by hook
+		$output .= $hookmanager->resPrint;
+
 		if (isModEnabled('fournisseur')) {
 			$colNumber++;
 			$output .= '	<th class="advanced-product-search-col --buy-price" >' . ($isSupplier ? $langs->trans('PredefinedFournPricesForFill').img_help(1, $langs->trans('PredefinedFournPricesForFillHelp')) : $langs->trans('BuyPrice')) . '</th>';
@@ -652,6 +682,11 @@ class AdvancedProductSearch
 								$output .= '<td class="advanced-product-search-col --stock-reel" >' . $product->stock_reel . '</td>';
 								$output .= '<td class="advanced-product-search-col --stock-theorique" >' . $product->stock_theorique . '</td>';
 							}
+
+							$hookParam = $hooksParameters;
+							$hookParam['product'] = $product;
+							$hookmanager->executeHooks('printFieldListValue', $hookParam, $object, $action); // Note that $action and $object may have been modified by hook
+							$output .= $hookmanager->resPrint;
 
 							if (isModEnabled('fournisseur')) {
 								$output .= '<td class="advanced-product-search-col --buy-price" >';

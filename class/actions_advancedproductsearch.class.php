@@ -104,7 +104,7 @@ class ActionsAdvancedProductSearch extends \advancedproductsearch\RetroCompatCom
 			/** @var CommonObject $object */
 
 			// STATUS DRAFT ONLY AND NOT IN EDIT MODE
-		    if(!empty($object->statut) || $action=='editline'){
+		    if(!empty($object->statut) || !empty($object->status)  || $action=='editline'){
 		        return 0;
 		    }
 
