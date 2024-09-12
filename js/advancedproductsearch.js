@@ -164,7 +164,8 @@ jQuery(function ($) {
 				AdvancedProductSearch.fk_element = fk_element;
 				AdvancedProductSearch.newToken = token;
 
-				AdvancedProductSearch.discountLoadSearchProductDialogForm("&element="+element+"&fk_element="+fk_element+"&displayResults=0&sall=" + search_idprod, true);
+				let displayResult = search_idprod.length > 0 ? 1 : 0;
+				AdvancedProductSearch.discountLoadSearchProductDialogForm('&element=' + element + '&fk_element=' + fk_element + '&displayResults=' + displayResult + '&sall=' + search_idprod, true);
 				$('#'+productSearchDialogBox).parent().css('z-index', 1002);
 				$('.ui-widget-overlay').css('z-index', 1001);
 			}

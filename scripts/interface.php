@@ -423,7 +423,7 @@ if ($action === 'add-product') {
 elseif ($action === 'product-search-form') {
 	$AdvancedProductSearch = new AdvancedProductSearch();
 
-	if(isset($_GET['displayResults']) &&  GETPOST("element", 'int') == 0){
+	if(isset($_GET['displayResults']) && GETPOSTINT('displayResults') == 0){
 		$AdvancedProductSearch->displayResults = false;
 	}
 

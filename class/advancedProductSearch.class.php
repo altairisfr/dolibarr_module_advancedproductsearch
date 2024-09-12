@@ -7,7 +7,7 @@ class AdvancedProductSearch
 {
 
 
-	public $displayResults = true; // TODO ajouter une valeur par défaut en conf
+	public $displayResults = true;
 
 	public $searchSelectArray;
 	public $searchSqlSelectCount;

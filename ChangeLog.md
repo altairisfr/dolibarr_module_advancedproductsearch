@@ -3,7 +3,7 @@
 
 # NOT RELEASED
 
-
+- NEW : Setup conf for default search behavior  - *12/09/2024* - 1.7.0
 
 ## Release 1.6
 
