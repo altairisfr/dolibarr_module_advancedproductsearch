@@ -51,7 +51,7 @@ class AdvancedProductSearch
 		'search_category_product_operator' => 0,
 		'search_category_product_list' => '',
 		'search_tosell' => 1,
-		//	'search_tobuy'
+		'search_tobuy' => 1,
 		'fourn_id' => '',
 		'catid' => '',
 		//	'search_tobatch '
@@ -218,8 +218,17 @@ class AdvancedProductSearch
 //	$this->search['search_vatrate'] = GETPOST("search_vatrate", 'alpha');
 		$this->search['search_category_product_operator'] = (GETPOST('search_category_product_operator', 'int') ? GETPOST('search_category_product_operator', 'int') : 0);
 		$this->search['search_category_product_list'] = GETPOST('search_category_product_list', 'array');
-		$this->search['search_tosell'] = 1; // GETPOST("search_tosell", 'int'); // TODO
-//	$this->search['search_tobuy'] = GETPOST("search_tobuy", 'int'); // TODO
+		if (GETPOST("search_tosell", 'int') === "") {
+			$this->search['search_tosell'] = "1";
+		} else {
+			$this->search['search_tosell'] = GETPOST("search_tosell", 'int');
+		}
+		if (GETPOST("search_tobuy", 'int') === "") {
+			$this->search['search_tobuy'] = "1";
+		} else {
+			$this->search['search_tobuy'] = GETPOST("search_tobuy", 'int');
+		}
+//		$this->search['search_tobuy'] = GETPOST("search_tobuy", 'int') ;
 		$this->search['fourn_id'] = GETPOST("fourn_id", 'int');
 		$this->search['catid'] = GETPOST('catid', 'int');
 //	$this->search['search_tobatch ']= GETPOST("search_tobatch", 'int');
@@ -346,6 +355,7 @@ class AdvancedProductSearch
 		if ($this->search['search_ref'])     $this->searchSql .= natural_search('p.ref', $this->search['search_ref']);
 		if ($this->search['search_label'])   $this->searchSql .= natural_search('p.label', $this->search['search_label']);
 		if ($this->search['search_barcode']) $this->searchSql .= natural_search('p.barcode', $this->search['search_barcode']);
+
 		// Filter on supplier
 		if (isModEnabled('fournisseur') && !empty($this->search['search_supplierref'])){
 			$this->searchSql .= natural_search('pfp.ref_fourn', $this->search['search_supplierref']);
@@ -460,6 +470,15 @@ class AdvancedProductSearch
 			$moreForFilter .= '<input type="text" name="search_supplierref" value="'.dol_htmlentities($this->search['search_supplierref']).'" />';
 			$moreForFilter .= '</div>';
 		}
+
+		$moreForFilter .= '<div class="divsearchfield" >';
+		$moreForFilter .= '<input type="hidden" name="search_tosell" value="0"/>';
+		$moreForFilter .= '<input type="checkbox" id="search_tosell" class="valignmiddle" name="search_tosell" value="1" ' .($this->search['search_tosell'] == 1 ? ' checked="checked"' : '') .'/>';
+		$moreForFilter .= '<label for="search_tosell" class="paddingright">' . $langs->trans('searchToSell') .'</label>';
+		$moreForFilter .= '<input type="hidden" name="search_tobuy" value="0"/>';
+		$moreForFilter .= '<input type="checkbox" id="search_tobuy" class="valignmiddle" name="search_tobuy"  value="1" ' .($this->search['search_tobuy'] == 1 ? ' checked="checked"' : '') .'/>';
+		$moreForFilter .= '<label for="search_tobuy">' . $langs->trans('searchToBuy') .'</label>';
+		$moreForFilter .= '</div>';
 
 
 		// Filter on categories

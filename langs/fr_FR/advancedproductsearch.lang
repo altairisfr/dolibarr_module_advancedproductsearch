@@ -72,3 +72,6 @@ ProductCategories = Tags/catégories produits
 SearchWillBeOnTheseFields = La recherche globale s'effectue sur les champs suivants : %s
 ProductRefFourn = Référence fournisseur
 launchYourFirstSearch = Lancez votre recherche
+
+searchToBuy = En achat
+searchToSell = En vente
