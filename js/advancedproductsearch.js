@@ -121,6 +121,7 @@ jQuery(function ($) {
 
 		let element = $(this).attr('data-target-element');
 		let fk_element = $(this).attr('data-target-id');
+		let token = $(this).closest('form').find('input[name=token]').val();
 		let search_idprod = $('#search_idprod').val();
 		if (search_idprod === undefined) search_idprod = '';
 		let productSearchDialogBox = "product-search-dialog-box";
@@ -161,6 +162,7 @@ jQuery(function ($) {
 				//$(this).dialog('option', 'maxHeight', $(window).height()-30);
 				AdvancedProductSearch.element = element;
 				AdvancedProductSearch.fk_element = fk_element;
+				AdvancedProductSearch.newToken = token;
 
 				AdvancedProductSearch.discountLoadSearchProductDialogForm("&element="+element+"&fk_element="+fk_element+"&displayResults=0&sall=" + search_idprod, true);
 				$('#'+productSearchDialogBox).parent().css('z-index', 1002);
@@ -262,13 +264,11 @@ AdvancedProductSearch = {};
 
 		$('#'+o.productSearchDialogBox).prepend($('<div class="inner-dialog-overlay"><div class="dialog-loading__loading"><div class="dialog-loading__spinner-wrapper"><span class="dialog-loading__spinner-text">LOADING</span><span class="dialog-loading__spinner"></span></div></div></div>'));
 
-		$('#'+o.productSearchDialogBox).load( o.config.interface_url + '?action=product-search-form' + morefilters, function() {
+		$('#'+o.productSearchDialogBox).load( o.config.interface_url + '?action=product-search-form&token=' + o.newToken + morefilters, function() {
 			o.dialogCountAddedProduct = 0; // init count of product added for reload action
 			if(focus){
 				o.focusAtEndSearchInput($("#search-all-form-input"));
 			}
-
-			o.GetNewToken();
 
 			if($('#'+o.productSearchDialogBox).outerHeight() >= $( window ).height()-150 ){
 				$('#'+o.productSearchDialogBox).dialog( "option", "position", { my: "top", at: "top", of: window } ); // Hack to position the dialog box after ajax load
@@ -280,15 +280,6 @@ AdvancedProductSearch = {};
 			o.initToolTip($('#'+o.productSearchDialogBox+' .classfortooltip')); // restore tooltip after ajax call
 			$('#'+o.productSearchDialogBox).removeClass('--ajax-loading');
 		});
-	}
-
-	/**
-	 * Get new token
-	 */
-	o.GetNewToken = function (){
-		if($('#'+o.productSearchDialogBox + ' input[name=token]').length > 0){
-			o.newToken = $('#'+o.productSearchDialogBox + ' input[name=token]').val();
-		}
 	}
 
 
@@ -465,8 +456,6 @@ AdvancedProductSearch = {};
 		o.disableAddProductFields(fk_product, true);
 
 		o.initCurrentDocumentObjectVarsFromForm();
-
-		o.GetNewToken();
 
 		var sendData = {
 			'action': "add-product",
