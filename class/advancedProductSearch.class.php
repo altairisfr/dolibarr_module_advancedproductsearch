@@ -51,7 +51,7 @@ class AdvancedProductSearch
 		'search_category_product_operator' => 0,
 		'search_category_product_list' => '',
 		'search_tosell' => 1,
-		//	'search_tobuy'
+		'search_tobuy' => 1,
 		'fourn_id' => '',
 		'catid' => '',
 		//	'search_tobatch '
@@ -213,13 +213,21 @@ class AdvancedProductSearch
 		$this->search['search_supplierref'] = GETPOST("search_supplierref", 'alpha');
 		$this->search['search_barcode'] = GETPOST("search_barcode", 'alpha');
 		$this->search['search_label'] = GETPOST("search_label", 'alpha');
-
 		$this->search['search_type'] = -1; // TODO $this->search['search_type'] = GETPOST("search_type", 'int');
 //	$this->search['search_vatrate'] = GETPOST("search_vatrate", 'alpha');
 		$this->search['search_category_product_operator'] = (GETPOST('search_category_product_operator', 'int') ? GETPOST('search_category_product_operator', 'int') : 0);
 		$this->search['search_category_product_list'] = GETPOST('search_category_product_list', 'array');
-		$this->search['search_tosell'] = 1; // GETPOST("search_tosell", 'int'); // TODO
-//	$this->search['search_tobuy'] = GETPOST("search_tobuy", 'int'); // TODO
+		if (GETPOST("search_tosell", 'int') === "") {
+			$this->search['search_tosell'] = "1";
+		} else {
+			$this->search['search_tosell'] = GETPOST("search_tosell", 'int');
+		}
+		if (GETPOST("search_tobuy", 'int') === "") {
+			$this->search['search_tobuy'] = "1";
+		} else {
+			$this->search['search_tobuy'] = GETPOST("search_tobuy", 'int');
+		}
+//		$this->search['search_tobuy'] = GETPOST("search_tobuy", 'int') ;
 		$this->search['fourn_id'] = GETPOST("fourn_id", 'int');
 		$this->search['catid'] = GETPOST('catid', 'int');
 //	$this->search['search_tobatch ']= GETPOST("search_tobatch", 'int');
@@ -271,7 +279,7 @@ class AdvancedProductSearch
 
 		require_once DOL_DOCUMENT_ROOT.'/core/class/html.formother.class.php';
 		require_once DOL_DOCUMENT_ROOT.'/core/class/html.form.class.php';
-		if (!empty($conf->categorie->enabled)){
+		if (isModEnabled("categorie")){
 			require_once DOL_DOCUMENT_ROOT.'/categories/class/categorie.class.php';
 		}
 
@@ -306,13 +314,13 @@ class AdvancedProductSearch
 			$this->fieldsToSearchAll+= array_merge($this->fieldsToSearchAll, array('pl.label','pl.description','pl.note'));
 		}
 
-		if (!empty($conf->barcode->enabled)) {
+		if (isModEnabled("barcode")) {
 			$this->fieldsToSearchAll =  array_merge($this->fieldsToSearchAll, array('p.barcode','pfp.barcode'));
 			$this->fieldsToSearchAllText[]='Barcode';
 		}
 
 		// Filter on supplier
-		if (!empty($conf->fournisseur->enabled)){
+		if (isModEnabled("fournisseur")){
 			$this->fieldsToSearchAll[] = 'pfp.ref_fourn';
 			$this->fieldsToSearchAllText[]='ProductRefFourn';
 		}
@@ -332,7 +340,11 @@ class AdvancedProductSearch
 		if (!empty(getDolGlobalString('PRODUCT_USE_UNITS')))   $this->searchSql .= " LEFT JOIN ".MAIN_DB_PREFIX."c_units cu ON (cu.rowid = p.fk_unit)";
 
 		$this->searchSql .= ' WHERE p.entity IN ('.getEntity('product').')';
-		if (isset($this->search['search_tosell']) && dol_strlen($this->search['search_tosell']) > 0 && $this->search['search_tosell'] != -1) $this->searchSql .= " AND p.tosell = ".((int) $this->search['search_tosell']);
+		if (isset($this->search['search_tosell']) && dol_strlen($this->search['search_tosell']) > 0 && $this->search['search_tosell'] != -1)
+		{
+			$this->searchSql .= " AND p.tosell = ".((int) $this->search['search_tosell']);
+
+		}
 		if (isset($this->search['search_tobuy']) && dol_strlen($this->search['search_tobuy']) > 0 && $this->search['search_tobuy'] != -1)   $this->searchSql .= " AND p.tobuy = ".((int) $this->search['search_tobuy']);
 
 		if ($this->search['sall']) $this->searchSql .= natural_search($this->fieldsToSearchAll, $this->search['sall']);
@@ -346,8 +358,9 @@ class AdvancedProductSearch
 		if ($this->search['search_ref'])     $this->searchSql .= natural_search('p.ref', $this->search['search_ref']);
 		if ($this->search['search_label'])   $this->searchSql .= natural_search('p.label', $this->search['search_label']);
 		if ($this->search['search_barcode']) $this->searchSql .= natural_search('p.barcode', $this->search['search_barcode']);
+
 		// Filter on supplier
-		if (!empty($conf->fournisseur->enabled) && !empty($this->search['search_supplierref'])){
+		if (isModEnabled("fournisseur") && !empty($this->search['search_supplierref'])){
 			$this->searchSql .= natural_search('pfp.ref_fourn', $this->search['search_supplierref']);
 		}
 
@@ -448,22 +461,30 @@ class AdvancedProductSearch
 
 		$moreForFilter = '';
 		// Filter on supplier
-		if (!empty($conf->fournisseur->enabled))
+		if (isModEnabled("fournisseur"))
 		{
 			$moreForFilter .= '<div class="divsearchfield" >';
 			$moreForFilter .= $langs->trans('Supplier').': ';
 			$moreForFilter .= $form->select_company($this->search['fourn_id'], 'fourn_id', '', 1, 'supplier');
 			$moreForFilter .= '</div>';
-
 			$moreForFilter .= '<div class="divsearchfield" >';
 			$moreForFilter .= $langs->trans('SupplierRef').': ';
 			$moreForFilter .= '<input type="text" name="search_supplierref" value="'.dol_htmlentities($this->search['search_supplierref']).'" />';
 			$moreForFilter .= '</div>';
+
 		}
+		$moreForFilter .= '<div class="divsearchfield" >';
+		$moreForFilter .= '<input type="hidden" name="search_tosell" value="0"/>';
+		$moreForFilter .= '<input type="checkbox" id="search_tosell" class="valignmiddle" name="search_tosell" value="1" ' .($this->search['search_tosell'] == 1 ? ' checked="checked"' : '') .'/>';
+		$moreForFilter .= '<label for="search_tosell" class="paddingright">' . $langs->trans('searchToSell') .'</label>';
+		$moreForFilter .= '<input type="hidden" name="search_tobuy" value="0"/>';
+		$moreForFilter .= '<input type="checkbox" id="search_tobuy" class="valignmiddle" name="search_tobuy"  value="1" ' .($this->search['search_tobuy'] == 1 ? ' checked="checked"' : '') .'/>';
+		$moreForFilter .= '<label for="search_tobuy">' . $langs->trans('searchToBuy') .'</label>';
+		$moreForFilter .= '</div>';
 
 
 		// Filter on categories
-		if (!empty($conf->categorie->enabled))
+		if (isModEnabled("categorie"))
 		{
 			$moreForFilter .= '<div class="divsearchfield" >';
 			$moreForFilter .= $langs->trans('ProductCategories').': ';
@@ -502,12 +523,12 @@ class AdvancedProductSearch
 		$output.= '	</th>';
 
 
-		if($conf->stock->enabled){
+		if(isModEnabled("stock")){
 			$output.= '	<th class="advanced-product-search-col --stock-reel center" ></th>';
 			$output.= '	<th class="advanced-product-search-col --stock-theorique center" ></th>';
 		}
 
-		if (property_exists($conf->fournisseur, 'enabled') && $conf->fournisseur->enabled) {
+		if (property_exists($conf->fournisseur, 'enabled') && isModEnabled("fournisseur")) {
 			$output .= '	<th class="advanced-product-search-col --buy-price" ></th>';
 		}
 
@@ -543,12 +564,12 @@ class AdvancedProductSearch
 			. self::getDialogColSortLink($langs->trans('Label'), $this->search['pageUrl'], "p.label", $param, $this->search['sortfield'], $this->search['sortorder'], $classForSortLink)
 			.'</th>';
 
-		if($conf->stock->enabled){
+		if(isModEnabled("stock")){
 			$output.= '	<th class="advanced-product-search-col --stock-reel center" >'.$langs->trans('RealStock').'</th>';
 			$output.= '	<th class="advanced-product-search-col --stock-theorique center" >'.$langs->trans('VirtualStock').'</th>';
 			$colNumber+=2;
 		}
-		if (property_exists($conf->fournisseur, 'enabled') && $conf->fournisseur->enabled) {
+		if (property_exists($conf->fournisseur, 'enabled') && isModEnabled("fournisseur")) {
 			$colNumber++;
 			$output .= '	<th class="advanced-product-search-col --buy-price" >' . ($isSupplier ? $langs->trans('PredefinedFournPricesForFill').img_help(1, $langs->trans('PredefinedFournPricesForFillHelp')) : $langs->trans('BuyPrice')) . '</th>';
 		}
@@ -610,7 +631,7 @@ class AdvancedProductSearch
 							$finalSubprice = $this->searchubprice - $this->searchubprice * $reduction / 100;
 
 							// COMPTATIBILITE MODULE DISCOUNT RULE : RECHERCHE DE REGLE DE TARIFICATION
-							if (!empty($conf->discountrules->enabled) && !$isSupplier) {
+							if (isModEnabled("discountrules") && !$isSupplier) {
 								if (!class_exists('DiscountSearch')) {
 									dol_include_once('/discountrules/class/discountSearch.class.php');
 								}
@@ -637,12 +658,12 @@ class AdvancedProductSearch
 							$output .= '<tr class="advanced-product-search-row --data" data-product="' . $product->id . '"  >';
 							$output .= '<td class="advanced-product-search-col --ref" >' . $product->getNomUrl(1) . '</td>';
 							$output .= '<td class="advanced-product-search-col --label" >' . self::highlightWordsOfSearchQuery($product->label, $this->search['search_label'] . ' ' . $this->search['sall']) . '</td>';
-							if ($conf->stock->enabled) {
+							if (isModEnabled("stock")) {
 								$output .= '<td class="advanced-product-search-col --stock-reel" >' . $product->stock_reel . '</td>';
 								$output .= '<td class="advanced-product-search-col --stock-theorique" >' . $product->stock_theorique . '</td>';
 							}
 
-							if (property_exists($conf->fournisseur, 'enabled') && $conf->fournisseur->enabled) {
+							if (property_exists($conf->fournisseur, 'enabled') && isModEnabled("fournisseur")) {
 								$output .= '<td class="advanced-product-search-col --buy-price" >';
 								$TFournPriceList = self::getFournPriceList($product->id, $isSupplier ? $object->socid : 0);
 								if (!empty($TFournPriceList)) {
@@ -658,7 +679,7 @@ class AdvancedProductSearch
 											'data-up' => $TpriceInfos['price'],
 											'data-fourn_qty' => $TpriceInfos['fourn_qty']
 										);
-										if (!empty($conf->margin->enabled)) {
+										if (isModEnabled("margin")) {
 											if (getDolGlobalInt('MARGIN_TYPE') == 1 && is_numeric($TpriceInfos['id'])) {
 												$idSelected = $TpriceInfos['id'];
 											} elseif (getDolGlobalString('MARGIN_TYPE') === 'pmp') {
@@ -981,7 +1002,7 @@ class AdvancedProductSearch
 		}
 
 
-		if (!empty($conf->$module->enabled))
+		if (isModEnabled($module))
 		{
 			$res = dol_include_once('/'.$classpath.'/'.$classfile.'.class.php');
 			if ($res)
@@ -1058,7 +1079,7 @@ class AdvancedProductSearch
 			}
 
 			// After best supplier prices and before costprice
-			if (!empty($conf->stock->enabled))
+			if (isModEnabled("stock"))
 			{
 				// Add price for pmp
 				$price = $producttmp->pmp;
