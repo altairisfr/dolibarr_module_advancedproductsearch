@@ -73,3 +73,5 @@ SearchWillBeOnTheseFields = La recherche globale s'effectue sur les champs suiva
 ProductRefFourn = Référence fournisseur
 launchYourFirstSearch = Lancez votre recherche
 QtyAlreadyInDoc = Quantité déjà présente dans le document
+searchToBuy = En achat
+searchToSell = En vente

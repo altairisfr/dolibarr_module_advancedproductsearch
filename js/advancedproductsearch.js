@@ -101,7 +101,7 @@ jQuery(function ($) {
 
 	$(document).on("keyup", ".on-update-calc-prices" , function(event) {
 		let fk_product = $(this).attr("data-product");
-		AdvancedProductSearch.updateLinePricesCalcs(fk_product)
+		AdvancedProductSearch.updateLinePricesCalcs(fk_product);
 	});
 
 
