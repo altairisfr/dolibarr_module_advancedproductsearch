@@ -1122,7 +1122,16 @@ class AdvancedProductSearch
 					}
 
 					$label = price($price, 0, $langs, 0, 0, -1, $conf->currency)."/".$langs->trans("Unit");
-					if ($productSupplier->fourn_ref) $label .= ' ('.$productSupplier->fourn_ref.')';
+					
+					if(!empty($productSupplier->fourn_name) || !empty($productSupplier->fourn_ref) ){
+						$label .= ' (';
+						if ($productSupplier->fourn_name) $label .= $productSupplier->fourn_name;
+						if(!empty($productSupplier->fourn_name) || !empty($productSupplier->fourn_ref) ) $label .= ' : ';
+						if ($productSupplier->fourn_ref) $label .= $productSupplier->fourn_ref;
+						$label .= ')';
+					}
+
+					
 
 					$prices[] = array(
 						"id" => $productSupplier->product_fourn_price_id,
