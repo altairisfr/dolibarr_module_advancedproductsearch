@@ -2,7 +2,7 @@
 
 
 # NOT RELEASED
-
+- NEW : Ajout d'une colonne taux de marque dans la popin de recherche de produits/services avec tous les calculs dynamiques qui vont avec - ** 29/10/2024 ** - 1.7
 
 
 ## Release 1.6

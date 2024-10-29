@@ -100,26 +100,43 @@ jQuery(function ($) {
 			$(this).closest('tr').find('.buying_price_adv').addClass('hideobject').hide();
 		}
 
+		let fk_product = $(this).attr("data-product");
+		// AdvancedProductSearch.updateLinePricesCalcs(fk_product);
+		AdvancedProductSearch.updateLineTauxMarqueCalcs(fk_product);
+
 	});
 
-	// Update prices display
+	// Update with prices
 	$(document).on("change", ".on-update-calc-prices" , function(event) {
 		let fk_product = $(this).attr("data-product");
-		AdvancedProductSearch.updateLinePricesCalcs(fk_product)
-	});
-
-	$(document).on("change", ".on-update-calc-tauxmarque" , function(event) {
-		let fk_product = $(this).attr("data-product");
-		AdvancedProductSearch.updateLineTauxMarqueCalcs(fk_product)
+		AdvancedProductSearch.updateLinePricesCalcs(fk_product);
 	});
 
 	$(document).on("keyup", ".on-update-calc-prices" , function(event) {
 		let fk_product = $(this).attr("data-product");
 		AdvancedProductSearch.updateLinePricesCalcs(fk_product);
 	});
+
+	// Update with tauxmarque
+	$(document).on("change", ".on-update-calc-tauxmarque" , function(event) {
+		let fk_product = $(this).attr("data-product");
+		AdvancedProductSearch.updateLineTauxMarqueCalcs(fk_product);
+	});
+
 	$(document).on("keyup", ".on-update-calc-tauxmarque" , function(event) {
 		let fk_product = $(this).attr("data-product");
-		AdvancedProductSearch.updateLineTauxMarqueCalcs(fk_product)
+		AdvancedProductSearch.updateLineTauxMarqueCalcs(fk_product);
+	});
+
+	// Update with input buying price
+	$(document).on("change", ".on-update-calc-buyingprice" , function(event) {
+		let fk_product = $(this).attr("data-product");
+		AdvancedProductSearch.updateLineTauxMarqueCalcs(fk_product);
+	});
+
+	$(document).on("keyup", ".on-update-calc-buyingprice" , function(event) {
+		let fk_product = $(this).attr("data-product");
+		AdvancedProductSearch.updateLineTauxMarqueCalcs(fk_product);
 	});
 
 
@@ -439,20 +456,17 @@ AdvancedProductSearch = {};
 		selectedOption = inputSelect.find("option:selected");
 		inputSubPrice = $("#advanced-product-search-list-input-subprice-" + fk_product);
 
-
-
-
 		var inputElement = $('#buying_price_adv');
-
 		var inputValue = inputElement.val(); // Récupérer la valeur de l'input
+ 		var costPrice = 0;
 
 		if (!$('#buying_price_adv').hasClass('hideobject')) {
-			console.log(inputValue);
+			costPrice = inputValue;
+		}else {
+			costPrice = Number(selectedOption.data("up")) || 0;
 		}
 
-
 		// Récupérer les valeurs
-		let costPrice = Number(selectedOption.data("up")) || 0;
 		let tauxMarque = Number(inputTauxMarque.val()) || 0;
 		let qty = Number($("#advanced-product-search-list-input-qty-" + fk_product).val()) || 0;
 
@@ -460,13 +474,14 @@ AdvancedProductSearch = {};
 			tauxMarque = 99;
 			inputTauxMarque.val(tauxMarque);
 		}
+
 		// Vérification du taux de marque
 		if (isNaN(tauxMarque) || tauxMarque < 0) {
 			console.error("Le taux de marque est invalide : ", tauxMarque);
-			tauxMarque = 0; // Ou gérez comme bon vous semble
+			tauxMarque = 0;
 		}
 
-		// Calculer le prix de vente basé sur le prix de revient
+		// Calculer le prix de vente
 		let sellingPrice = costPrice / (1 - tauxMarque / 100);
 
 		// Mettre à jour l'input pour le prix de vente

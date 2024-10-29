@@ -726,7 +726,7 @@ class AdvancedProductSearch
 									$output .= price($product->pmp);
 								}
 								$output .= '<br/>';
-								$output .= '<input id="buying_price_adv" type="text" class="flat maxwidth75 right hideobject buying_price_adv" length="3" name="buying_price_adv_' . $product->id . '" value="0" data-product="' . $product->id . '">';
+								$output .= '<input id="buying_price_adv"  type="number" step="any" min="0" maxlength="8" size="3" class="flat maxwidth75 right hideobject buying_price_adv on-update-calc-buyingprice" name="buying_price_adv_' . $product->id . '" value="0" data-product="' . $product->id . '">';
 								$output .= '</td>';
 							}
 
@@ -1113,9 +1113,21 @@ class AdvancedProductSearch
 				'fourn_qty' => 0
 			); // For price field, we must use price2num(), for label or title, price()
 
+			$logs = $producttmp->list_product_fournisseur_price($producttmp->id, 'pfp.datec', 'DESC', 1);
+			// Récupère uniquement le premier résultat (le plus récent grâce à l'ordre DESC)
+			$log_recent = $logs[0];
+			$lastprice = $log_recent->fourn_price;
+			$prices[] = array(
+				"id" => 'lastprice',
+				"price" => price2num($lastprice),
+				"label" => $langs->trans("LastPrice").': '.price($lastprice, 0, $langs, 0, 0, -1, $conf->currency),
+				"title" => $langs->trans("LastPrice").': '.price($lastprice, 0, $langs, 0, 0, -1, $conf->currency),
+				'fourn_qty' => 0
+			);
+
 			$prices[] = array(
 				"id" => 'inputprice',
-				"price" => 'test',
+				"price" => '0',
 				"label" => $langs->trans("InputPrice"),
 				"title" => $langs->trans("InputPrice"),
 				'fourn_qty' => 0

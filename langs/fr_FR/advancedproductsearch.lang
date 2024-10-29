@@ -66,6 +66,7 @@ ErrorMissingModuleDiscountRule = Erreur : le module règle de remise est install
 FinalDiscountPrice = Prix final
 TauxMarque=Taux de marque
 InputPrice=Saisir un prix ...
+LastPrice=Dernier prix
 
 PredefinedFournPricesForFill=Prix d'achat prédéfinis
 PredefinedFournPricesForFillHelp=Sélectionnez un tarif dans la liste pour remplir automatiquement la colonne "Prix"
