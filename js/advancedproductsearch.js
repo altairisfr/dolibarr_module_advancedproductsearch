@@ -134,8 +134,8 @@ jQuery(function ($) {
 
 	$(document).on("keyup", ".on-update-calc-buyingprice" , function(event) {
 		let fk_product = $(this).attr("data-product");
-		// AdvancedProductSearch.updateLineTauxMarqueCalcs(fk_product);
-		// AdvancedProductSearch.updateLinePricesCalcs(fk_product);
+		AdvancedProductSearch.updateLineTauxMarqueCalcs(fk_product);
+		AdvancedProductSearch.updateLinePricesCalcs(fk_product);
 	});
 
 
