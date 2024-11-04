@@ -71,8 +71,6 @@ jQuery(function ($) {
 		}
 	});
 
-
-
 	$(document).on("change", "[name^=prodfourprice]", function() {
 		// limité au côté fournisseur
 		if(AdvancedProductSearch.isSupplierDocument()){
@@ -92,6 +90,7 @@ jQuery(function ($) {
 			$("#advanced-product-search-list-input-subprice-" + fk_product).trigger('change');
 		}
 
+		var fk_product = $(this).attr("data-product");
 		var linevalue = $(this).find('option:selected').val();
 
 		if (linevalue == 'inputprice') {
@@ -100,8 +99,6 @@ jQuery(function ($) {
 			$(this).closest('tr').find('.buying_price_adv').addClass('hideobject').hide();
 		}
 
-		let fk_product = $(this).attr("data-product");
-		// AdvancedProductSearch.updateLinePricesCalcs(fk_product);
 		AdvancedProductSearch.updateLineTauxMarqueCalcs(fk_product);
 
 	});
@@ -132,11 +129,13 @@ jQuery(function ($) {
 	$(document).on("change", ".on-update-calc-buyingprice" , function(event) {
 		let fk_product = $(this).attr("data-product");
 		AdvancedProductSearch.updateLineTauxMarqueCalcs(fk_product);
+		AdvancedProductSearch.updateLinePricesCalcs(fk_product);
 	});
 
 	$(document).on("keyup", ".on-update-calc-buyingprice" , function(event) {
 		let fk_product = $(this).attr("data-product");
-		AdvancedProductSearch.updateLineTauxMarqueCalcs(fk_product);
+		// AdvancedProductSearch.updateLineTauxMarqueCalcs(fk_product);
+		// AdvancedProductSearch.updateLinePricesCalcs(fk_product);
 	});
 
 
@@ -420,8 +419,17 @@ AdvancedProductSearch = {};
 		inputSelect = $("#prodfourprice-" + fk_product);
 		selectedOption = inputSelect.find("option:selected");
 
+		var inputElement = $('#buying_price_adv');
+		var inputValue = inputElement.val(); // Récupérer la valeur de l'input
+		var costPrice = 0;
+
+		if (!inputElement.hasClass('hideobject')) {
+			costPrice = inputValue;
+		}else {
+			costPrice = Number(selectedOption.data("up")) || 0;
+		}
+
 		// Récupérer les valeurs
-		let costPrice = Number(selectedOption.data("up")) || 0;
 		let qty = Number(inputQty.val());
 		let subPrice = Number(inputSubPrice.val());
 		let reduction = Number(inputReduction.val());
@@ -460,7 +468,7 @@ AdvancedProductSearch = {};
 		var inputValue = inputElement.val(); // Récupérer la valeur de l'input
  		var costPrice = 0;
 
-		if (!$('#buying_price_adv').hasClass('hideobject')) {
+		if (!inputElement.hasClass('hideobject')) {
 			costPrice = inputValue;
 		}else {
 			costPrice = Number(selectedOption.data("up")) || 0;
