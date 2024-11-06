@@ -734,7 +734,11 @@ class AdvancedProductSearch
 							if (!empty($idSelected) && isset($this->searchSelectArray[$idSelected])) {
 								// Convertir en float pour éviter les erreurs de type
 								$selectedPrice = floatval($this->searchSelectArray[$idSelected]['data-up']);
-								$tauxmarque = (($this->searchubprice - $selectedPrice) / $this->searchubprice) * 100;
+								if ($this->searchubprice <=0){
+									$tauxmarque = 0;
+								}else{
+									$tauxmarque = (($this->searchubprice - $selectedPrice) / $this->searchubprice) * 100;
+								}
 							}
 
 							$output .= '<td class="advanced-product-search-col --tauxmarque right nowraponall" >';

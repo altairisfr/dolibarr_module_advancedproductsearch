@@ -2,6 +2,7 @@
 
 
 # NOT RELEASED
+- FIX : DA025694 - Fatal sur popin de recherche quand le prix d'achat = 0. - ** 06/11/2024 ** - 1.7.0
 - NEW : Ajout d'une colonne taux de marque dans la popin de recherche de produits/services avec tous les calculs dynamiques qui vont avec - ** 29/10/2024 ** - 1.7.0
 
 
