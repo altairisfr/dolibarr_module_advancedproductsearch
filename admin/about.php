@@ -95,9 +95,14 @@ print load_fiche_titre($langs->trans($page_name), $linkback, 'title_setup');
 $head = advancedproductsearchAdminPrepareHead();
 print dol_get_fiche_head($head, 'about', $langs->trans($page_name), 0, 'advancedproductsearch@advancedproductsearch');
 
+
+require_once __DIR__ . '/../class/techatm.class.php';
+$techATM = new \ATM\advancedproductsearch\TechATM($db);
+
 dol_include_once('/advancedproductsearch/core/modules/modAdvancedProductSearch.class.php');
-$tmpmodule = new modAdvancedProductSearch($db);
-print $tmpmodule->getDescLong();
+$moduleDescriptor = new modAdvancedProductSearch($db);
+
+print $techATM->getAboutPage($moduleDescriptor);
 
 // Page end
 print dol_get_fiche_end();
