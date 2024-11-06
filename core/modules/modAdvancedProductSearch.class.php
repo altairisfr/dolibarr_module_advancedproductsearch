@@ -146,6 +146,10 @@ class modAdvancedProductSearch extends DolibarrModules
 		// The language file dedicated to your module
 		$this->langfiles = array("advancedproductsearch@advancedproductsearch");
 
+		// Url to the file with your last numberversion of this module
+		require_once __DIR__ . '/../../class/techatm.class.php';
+		$this->url_last_version = \ATM\advancedproductsearch\TechATM::getLastModuleVersionUrl($this);
+
 		// Prerequisites
 		$this->phpmin = array(7, 0); // Minimum version of PHP required by module
 		$this->need_dolibarr_version = array(16, 0); // Minimum version of Dolibarr required by module
