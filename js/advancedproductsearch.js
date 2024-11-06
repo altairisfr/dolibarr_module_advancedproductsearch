@@ -71,8 +71,6 @@ jQuery(function ($) {
 		}
 	});
 
-
-
 	$(document).on("change", "[name^=prodfourprice]", function() {
 		// limité au côté fournisseur
 		if(AdvancedProductSearch.isSupplierDocument()){
@@ -91,16 +89,52 @@ jQuery(function ($) {
 			}
 			$("#advanced-product-search-list-input-subprice-" + fk_product).trigger('change');
 		}
+
+		var fk_product = $(this).attr("data-product");
+		var linevalue = $(this).find('option:selected').val();
+
+		if (linevalue == 'inputprice') {
+			$(this).closest('tr').find('.buying_price_adv').removeClass('hideobject').show();
+		} else {
+			$(this).closest('tr').find('.buying_price_adv').addClass('hideobject').hide();
+		}
+
+		AdvancedProductSearch.updateLineTauxMarqueCalcs(fk_product);
+
 	});
 
-	// Update prices display
+	// Update with prices
 	$(document).on("change", ".on-update-calc-prices" , function(event) {
 		let fk_product = $(this).attr("data-product");
-		AdvancedProductSearch.updateLinePricesCalcs(fk_product)
+		AdvancedProductSearch.updateLinePricesCalcs(fk_product);
 	});
 
 	$(document).on("keyup", ".on-update-calc-prices" , function(event) {
 		let fk_product = $(this).attr("data-product");
+		AdvancedProductSearch.updateLinePricesCalcs(fk_product);
+	});
+
+	// Update with tauxmarque
+	$(document).on("change", ".on-update-calc-tauxmarque" , function(event) {
+		let fk_product = $(this).attr("data-product");
+		AdvancedProductSearch.updateLineTauxMarqueCalcs(fk_product);
+	});
+
+	$(document).on("keyup", ".on-update-calc-tauxmarque" , function(event) {
+		let fk_product = $(this).attr("data-product");
+		AdvancedProductSearch.updateLineTauxMarqueCalcs(fk_product);
+	});
+
+	// Update with input buying price
+	$(document).on("change", ".on-update-calc-buyingprice" , function(event) {
+		let fk_product = $(this).attr("data-product");
+		AdvancedProductSearch.updateLineTauxMarqueCalcs(fk_product);
+		AdvancedProductSearch.updateLinePricesCalcs(fk_product);
+	});
+
+	$(document).on("keyup", ".on-update-calc-buyingprice" , function(event) {
+		let fk_product = $(this).attr("data-product");
+		AdvancedProductSearch.updateLineTauxMarqueCalcs(fk_product);
 		AdvancedProductSearch.updateLinePricesCalcs(fk_product);
 	});
 
@@ -383,8 +417,21 @@ AdvancedProductSearch = {};
 		inputQty = $("#advanced-product-search-list-input-qty-"+fk_product);
 		inputSubPrice = $("#advanced-product-search-list-input-subprice-"+fk_product);
 		inputReduction = $("#advanced-product-search-list-input-reduction-"+fk_product);
+		inputTauxMarque = $("#advanced-product-search-list-input-tauxmarque-" + fk_product);
+		inputSelect = $("#prodfourprice-" + fk_product);
+		selectedOption = inputSelect.find("option:selected");
 
+		var inputElement = $('#buying_price_adv');
+		var inputValue = inputElement.val(); // Récupérer la valeur de l'input
+		var costPrice = 0;
 
+		if (!inputElement.hasClass('hideobject')) {
+			costPrice = inputValue;
+		}else {
+			costPrice = Number(selectedOption.data("up")) || 0;
+		}
+
+		// Récupérer les valeurs
 		let qty = Number(inputQty.val());
 		let subPrice = Number(inputSubPrice.val());
 		let reduction = Number(inputReduction.val());
@@ -392,6 +439,11 @@ AdvancedProductSearch = {};
 			reduction = 100;
 			inputReduction.val(reduction);
 		}
+
+		//Calcul du taux de marque
+		let calcTauxMarque = ((subPrice - costPrice) / subPrice) * 100;
+		inputTauxMarque.val(calcTauxMarque);
+
 
 		let finalUnitPrice = subPrice - (subPrice * reduction / 100);
 		finalUnitPrice = Number(finalUnitPrice.toFixed(o.config.MAIN_MAX_DECIMALS_UNIT));
@@ -402,6 +454,58 @@ AdvancedProductSearch = {};
 		$("#discount-prod-list-final-subprice-"+fk_product).html(finalUnitPrice.toLocaleString(undefined, { minimumFractionDigits: o.config.MAIN_MAX_DECIMALS_TOT, maximumFractionDigits: o.config.MAIN_MAX_DECIMALS_UNIT }));
 		$("#discount-prod-list-final-price-"+fk_product).html(finalPrice.toLocaleString(undefined, { minimumFractionDigits: o.config.MAIN_MAX_DECIMALS_TOT }));
 	}
+
+	/**
+	 * Met a jour les calcules du taux de marque sur les données des input
+	 * @param fk_product
+	 */
+	o.updateLineTauxMarqueCalcs = function (fk_product) {
+		// Récupérer les inputs
+		inputTauxMarque = $("#advanced-product-search-list-input-tauxmarque-" + fk_product);
+		inputSelect = $("#prodfourprice-" + fk_product);
+		selectedOption = inputSelect.find("option:selected");
+		inputSubPrice = $("#advanced-product-search-list-input-subprice-" + fk_product);
+
+		var inputElement = $('#buying_price_adv');
+		var inputValue = inputElement.val(); // Récupérer la valeur de l'input
+ 		var costPrice = 0;
+
+		if (!inputElement.hasClass('hideobject')) {
+			costPrice = inputValue;
+		}else {
+			costPrice = Number(selectedOption.data("up")) || 0;
+		}
+
+		// Récupérer les valeurs
+		let tauxMarque = Number(inputTauxMarque.val()) || 0;
+		let qty = Number($("#advanced-product-search-list-input-qty-" + fk_product).val()) || 0;
+
+		if (tauxMarque > 99){
+			tauxMarque = 99;
+			inputTauxMarque.val(tauxMarque);
+		}
+
+		// Vérification du taux de marque
+		if (isNaN(tauxMarque) || tauxMarque < 0) {
+			console.error("Le taux de marque est invalide : ", tauxMarque);
+			tauxMarque = 0;
+		}
+
+		// Calculer le prix de vente
+		let sellingPrice = costPrice / (1 - tauxMarque / 100);
+
+		// Mettre à jour l'input pour le prix de vente
+		inputSubPrice.val(sellingPrice.toFixed(2));
+
+		// Calculer le prix total basé sur la quantité
+		let finalPrice = sellingPrice * qty;
+
+		// Affichage des résultats
+		$("#discount-prod-list-final-subprice-" + fk_product).html(sellingPrice.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }));
+		$("#discount-prod-list-final-price-" + fk_product).html(finalPrice.toLocaleString(undefined, { minimumFractionDigits: 2 }));
+	};
+
+
 
 	/**
 	 * Positionne le focus et le curseur à la fin de l'input

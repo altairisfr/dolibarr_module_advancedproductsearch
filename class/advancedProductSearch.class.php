@@ -565,7 +565,7 @@ class AdvancedProductSearch
 		if (isModEnabled('fournisseur')) {
 			$output .= '	<th class="advanced-product-search-col --buy-price" ></th>';
 		}
-
+		$output.= '	<th class="advanced-product-search-col --tauxmarque" ></th>';
 		$output.= '	<th class="advanced-product-search-col --subprice" ></th>';
 		$output.= '	<th class="advanced-product-search-col --discount" ></th>';
 		$output.= '	<th class="advanced-product-search-col --finalsubprice" ></th>';
@@ -614,6 +614,7 @@ class AdvancedProductSearch
 			$colNumber++;
 			$output .= '	<th class="advanced-product-search-col --buy-price" >' . ($isSupplier ? $langs->trans('PredefinedFournPricesForFill').img_help(1, $langs->trans('PredefinedFournPricesForFillHelp')) : $langs->trans('BuyPrice')) . '</th>';
 		}
+		$output.= '	<th class="advanced-product-search-col --tauxmarque" >'.$langs->trans('TauxMarque').'</th>';
 		$output.= '	<th class="advanced-product-search-col --subprice" >'.$langs->trans('Price').'</th>';
 		$output.= '	<th class="advanced-product-search-col --discount" >'.$langs->trans('Discount').'</th>';
 		$output.= '	<th class="advanced-product-search-col --finalsubprice" >'.$langs->trans('FinalDiscountSubPrice').'</th>';
@@ -762,8 +763,7 @@ class AdvancedProductSearch
 									$translate = 0;
 									$maxlen = 0;
 									$disabled = 0;
-									if ($isSupplier) $this->searchSort = 'ASC';
-									else $this->searchSort = 'DESC';
+									$this->searchSort = $isSupplier ? 'ASC' : 'DESC';
 									$morecss = 'search-list-select';
 									$addjscombo = 0;
 									if (!empty($this->searchSelectArray)) {
@@ -773,11 +773,28 @@ class AdvancedProductSearch
 								} else {
 									$output .= price($product->pmp);
 								}
+								$output .= '<br/>';
+								$output .= '<input id="buying_price_adv"  type="number" step="any" min="0" maxlength="8" size="3" class="flat maxwidth75 right hideobject buying_price_adv on-update-calc-buyingprice" name="buying_price_adv_' . $product->id . '" value="0" data-product="' . $product->id . '">';
 								$output .= '</td>';
 							}
 
+							//Taux de marque
+							if (!empty($idSelected) && isset($this->searchSelectArray[$idSelected])) {
+								// Convertir en float pour éviter les erreurs de type
+								$selectedPrice = floatval($this->searchSelectArray[$idSelected]['data-up']);
+								if ($this->searchubprice <=0){
+									$tauxmarque = 0;
+								}else{
+									$tauxmarque = (($this->searchubprice - $selectedPrice) / $this->searchubprice) * 100;
+								}
+							}
 
-							//
+							$output .= '<td class="advanced-product-search-col --tauxmarque right nowraponall" >';
+							$output .= '<input id="advanced-product-search-list-input-tauxmarque-' . $product->id . '" data-product="' . $product->id . '"  class="right maxwidth40 on-update-calc-tauxmarque" type="number" step="any" min="0" maxlength="8" size="3" name="tauxmarque" value="'.round($tauxmarque, 2).'">';
+							$output .= ' %';
+							$output .= '</td>';
+
+							// Prix
 							$output .= '<td class="advanced-product-search-col --subprice right nowraponall" >';
 							$output .= '<input id="advanced-product-search-list-input-subprice-' . $product->id . '"  data-product="' . $product->id . '"   class="advanced-product-search-list-input-subprice right on-update-calc-prices" type="number" step="any" min="0" maxlength="8" size="3" value="' . $this->searchubprice . '" placeholder="x" name="prodsubprice[' . $product->id . ']" />';
 							$output .= ' ' . $langs->trans("HT");
@@ -1167,6 +1184,26 @@ class AdvancedProductSearch
 				"title" => $langs->trans("PMPValueShort").': '.price($price, 0, $langs, 0, 0, -1, $conf->currency),
 				'fourn_qty' => 0
 			); // For price field, we must use price2num(), for label or title, price()
+
+			$logs = $producttmp->list_product_fournisseur_price($producttmp->id, 'pfp.datec', 'DESC', 1);
+			// Récupère uniquement le premier résultat (le plus récent grâce à l'ordre DESC)
+			$log_recent = $logs[0];
+			$lastprice = $log_recent->fourn_price;
+			$prices[] = array(
+				"id" => 'lastprice',
+				"price" => price2num($lastprice),
+				"label" => $langs->trans("LastPrice").': '.price($lastprice, 0, $langs, 0, 0, -1, $conf->currency),
+				"title" => $langs->trans("LastPrice").': '.price($lastprice, 0, $langs, 0, 0, -1, $conf->currency),
+				'fourn_qty' => 0
+			);
+
+			$prices[] = array(
+				"id" => 'inputprice',
+				"price" => '0',
+				"label" => $langs->trans("InputPrice"),
+				"title" => $langs->trans("InputPrice"),
+				'fourn_qty' => 0
+			);
 		}
 
 		return $prices;
