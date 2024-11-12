@@ -71,3 +71,4 @@ ProductRefFourn=Référence fournisseur
 
 searchToBuy = For purchase
 searchToSell = For sale
+QtyAlreadyInDoc = Quantity already present in the document

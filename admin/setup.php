@@ -1,6 +1,6 @@
 <?php
 /* Copyright (C) 2004-2017 Laurent Destailleur  <eldy@users.sourceforge.net>
- * Copyright (C) ---Put here your own copyright and developer email---
+ * Copyright (C) 2021 Arthur Dupond <contact@atm-consulting.fr>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,8 +17,8 @@
  */
 
 /**
- * \file    htdocs/modulebuilder/template/admin/setup.php
- * \ingroup mymodule
+ * \file    advancedproductsearch/admin/setup.php
+ * \ingroup advancedproductsearch
  * \brief   AdvancedProductSearch setup page.
  */
 
@@ -51,7 +51,7 @@ if (!$res) {
 	die("Include of main fails");
 }
 
-global $langs, $user;
+global $langs, $user, $conf, $db, $object;
 
 // Libraries
 require_once DOL_DOCUMENT_ROOT."/core/lib/admin.lib.php";
@@ -60,6 +60,11 @@ require_once '../lib/advancedproductsearch.lib.php';
 
 // Translations
 $langs->loadLangs(array("admin", "advancedproductsearch@advancedproductsearch"));
+
+// Access control
+if (!$user->admin) {
+	accessforbidden();
+}
 
 // Initialize technical object to manage hooks of page. Note that conf->hooks_modules contains array of hook context
 $hookmanager->initHooks(array('advancedproductsearchsetup', 'globalsetup'));
@@ -97,75 +102,6 @@ if (!$user->admin) {
 }
 
 $formSetup->newItem('APS_NO_DISPLAY_RESULTS_ON_OPEN')->setAsYesNo();
-
-// Enter here all parameters in your setup page
-//
-//// Setup conf for selection of an URL
-//$item = $formSetup->newItem('MYMODULE_MYPARAM1');
-//$item->fieldOverride = (empty($_SERVER['HTTPS']) ? 'http://' : 'https://') . $_SERVER['HTTP_HOST'];
-//$item->cssClass = 'minwidth500';
-//
-//// Setup conf for selection of a simple string input
-//$item = $formSetup->newItem('MYMODULE_MYPARAM2');
-//$item->defaultFieldValue = 'default value';
-//$item->fieldAttr['placeholder'] = 'A placeholder here';
-//
-//// Setup conf for selection of a simple textarea input but we replace the text of field title
-//$item = $formSetup->newItem('MYMODULE_MYPARAM3');
-//$item->nameText = $item->getNameText().' more html text ';
-//
-//// Setup conf for a selection of a thirdparty
-//$item = $formSetup->newItem('MYMODULE_MYPARAM4');
-//$item->setAsThirdpartyType();
-//
-//// Setup conf for a selection of a boolean
-//$formSetup->newItem('MYMODULE_MYPARAM5')->setAsYesNo();
-//
-//// Setup conf for a selection of an email template of type thirdparty
-//$formSetup->newItem('MYMODULE_MYPARAM6')->setAsEmailTemplate('thirdparty');
-//
-//// Setup conf for a selection of a secured key
-////$formSetup->newItem('MYMODULE_MYPARAM7')->setAsSecureKey();
-//
-//// Setup conf for a selection of a product
-//$formSetup->newItem('MYMODULE_MYPARAM8')->setAsProduct();
-//
-//// Add a title for a new section
-//$formSetup->newItem('NewSection')->setAsTitle();
-//
-//$TField = array(
-//	'test01' => $langs->trans('test01'),
-//	'test02' => $langs->trans('test02'),
-//	'test03' => $langs->trans('test03'),
-//	'test04' => $langs->trans('test04'),
-//	'test05' => $langs->trans('test05'),
-//	'test06' => $langs->trans('test06'),
-//);
-//
-//// Setup conf for a simple combo list
-//$formSetup->newItem('MYMODULE_MYPARAM9')->setAsSelect($TField);
-//
-//// Setup conf for a multiselect combo list
-//$item = $formSetup->newItem('MYMODULE_MYPARAM10');
-//$item->setAsMultiSelect($TField);
-//$item->helpText = $langs->transnoentities('MYMODULE_MYPARAM10');
-//
-//// Setup conf for a category selection
-//$formSetup->newItem('MYMODULE_CATEGORY_ID_XXX')->setAsCategory('product');
-//
-//// Setup conf MYMODULE_MYPARAM10
-//$item = $formSetup->newItem('MYMODULE_MYPARAM10');
-//$item->setAsColor();
-//$item->defaultFieldValue = '#FF0000';
-//$item->nameText = $item->getNameText().' more html text ';
-//$item->fieldInputOverride = '';
-//$item->helpText = $langs->transnoentities('AnHelpMessage');
-////$item->fieldValue = '';
-////$item->fieldAttr = array() ; // fields attribute only for compatible fields like input text
-////$item->fieldOverride = false; // set this var to override field output will override $fieldInputOverride and $fieldOutputOverride too
-////$item->fieldInputOverride = false; // set this var to override field input
-////$item->fieldOutputOverride = false; // set this var to override field output
-
 
 $setupnotempty += count($formSetup->items);
 
@@ -250,7 +186,7 @@ if ($action == 'updateMask') {
 } elseif ($action == 'setmod') {
 	// TODO Check if numbering module chosen can be activated by calling method canBeActivated
 	if (!empty($tmpobjectkey)) {
-		$constforval = 'MYMODULE_'.strtoupper($tmpobjectkey)."_ADDON";
+		$constforval = 'ADVANCEDPRODUCTSEARCH_'.strtoupper($tmpobjectkey)."_ADDON";
 		dolibarr_set_const($db, $constforval, $value, 'chaine', 0, '', $conf->entity);
 	}
 } elseif ($action == 'set') {
@@ -260,7 +196,7 @@ if ($action == 'updateMask') {
 	$ret = delDocumentModel($value, $type);
 	if ($ret > 0) {
 		if (!empty($tmpobjectkey)) {
-			$constforval = 'MYMODULE_'.strtoupper($tmpobjectkey).'_ADDON_PDF';
+			$constforval = 'ADVANCEDPRODUCTSEARCH_'.strtoupper($tmpobjectkey).'_ADDON_PDF';
 			if (getDolGlobalString($constforval) == "$value") {
 				dolibarr_del_const($db, $constforval, $conf->entity);
 			}
@@ -269,7 +205,7 @@ if ($action == 'updateMask') {
 } elseif ($action == 'setdoc') {
 	// Set or unset default model
 	if (!empty($tmpobjectkey)) {
-		$constforval = 'MYMODULE_'.strtoupper($tmpobjectkey).'_ADDON_PDF';
+		$constforval = 'ADVANCEDPRODUCTSEARCH_'.strtoupper($tmpobjectkey).'_ADDON_PDF';
 		if (dolibarr_set_const($db, $constforval, $value, 'chaine', 0, '', $conf->entity)) {
 			// The constant that was read before the new set
 			// We therefore requires a variable to have a coherent view
@@ -284,7 +220,7 @@ if ($action == 'updateMask') {
 	}
 } elseif ($action == 'unsetdoc') {
 	if (!empty($tmpobjectkey)) {
-		$constforval = 'MYMODULE_'.strtoupper($tmpobjectkey).'_ADDON_PDF';
+		$constforval = 'ADVANCEDPRODUCTSEARCH_'.strtoupper($tmpobjectkey).'_ADDON_PDF';
 		dolibarr_del_const($db, $constforval, $conf->entity);
 	}
 }
@@ -397,7 +333,7 @@ foreach ($myTmpObjects as $myTmpObjectKey => $myTmpObjectArray) {
 								print '</td>'."\n";
 
 								print '<td class="center">';
-								$constforvar = 'MYMODULE_'.strtoupper($myTmpObjectKey).'_ADDON';
+								$constforvar = 'ADVANCEDPRODUCTSEARCH_'.strtoupper($myTmpObjectKey).'_ADDON';
 								if (getDolGlobalString($constforvar) == $file) {
 									print img_picto($langs->trans("Activated"), 'switch_on');
 								} else {
@@ -540,7 +476,7 @@ foreach ($myTmpObjects as $myTmpObjectKey => $myTmpObjectArray) {
 
 										// Default
 										print '<td class="center">';
-										$constforvar = 'MYMODULE_'.strtoupper($myTmpObjectKey).'_ADDON_PDF';
+										$constforvar = 'ADVANCEDPRODUCTSEARCH_'.strtoupper($myTmpObjectKey).'_ADDON_PDF';
 										if (getDolGlobalString($constforvar) == $name) {
 											//print img_picto($langs->trans("Default"), 'on');
 											// Even if choice is the default value, we allow to disable it. Replace this with previous line if you need to disable unset
