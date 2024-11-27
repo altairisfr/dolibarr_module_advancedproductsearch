@@ -3,8 +3,13 @@
 
 # NOT RELEASED
 
+## Release 1.10
 - NEW : Add hooks for list - **12/09/2024** - 1.10.0
+
+## Release 1.9
 - NEW : Display qty of current document  - **12/09/2024** - 1.9.0
+
+## Release 1.8
 - NEW : Setup conf for default search behavior  - **12/09/2024** - 1.8.0
 
 ## Release 1.7
