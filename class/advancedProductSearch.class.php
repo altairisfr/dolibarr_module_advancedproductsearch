@@ -495,7 +495,7 @@ class AdvancedProductSearch
 		{
 			$moreForFilter .= '<div class="divsearchfield" >';
 			$moreForFilter .= $langs->trans('Supplier').': ';
-			$moreForFilter .= $form->select_company($this->search['fourn_id'], 'fourn_id', '', 1, 'supplier');
+			$moreForFilter .= $form->select_company($this->search['fourn_id'], 'fourn_id', 's.fournisseur=1', 1, 'supplier');
 			$moreForFilter .= '</div>';
 
 			$moreForFilter .= '<div class="divsearchfield" >';
@@ -779,6 +779,7 @@ class AdvancedProductSearch
 							}
 
 							//Taux de marque
+							$tauxmarque = 0;
 							if (!empty($idSelected) && isset($this->searchSelectArray[$idSelected])) {
 								// Convertir en float pour éviter les erreurs de type
 								$selectedPrice = floatval($this->searchSelectArray[$idSelected]['data-up']);
@@ -1139,7 +1140,7 @@ class AdvancedProductSearch
 					}
 
 					$label = price($price, 0, $langs, 0, 0, -1, $conf->currency)."/".$langs->trans("Unit");
-					
+
 					if(!empty($productSupplier->fourn_name) || !empty($productSupplier->fourn_ref) ){
 						$label .= ' (';
 						if ($productSupplier->fourn_name) $label .= $productSupplier->fourn_name;
@@ -1148,7 +1149,7 @@ class AdvancedProductSearch
 						$label .= ')';
 					}
 
-					
+
 
 					$prices[] = array(
 						"id" => $productSupplier->product_fourn_price_id,
@@ -1187,23 +1188,27 @@ class AdvancedProductSearch
 
 			$logs = $producttmp->list_product_fournisseur_price($producttmp->id, 'pfp.datec', 'DESC', 1);
 			// Récupère uniquement le premier résultat (le plus récent grâce à l'ordre DESC)
-			$log_recent = $logs[0];
-			$lastprice = $log_recent->fourn_price;
-			$prices[] = array(
-				"id" => 'lastprice',
-				"price" => price2num($lastprice),
-				"label" => $langs->trans("LastPrice").': '.price($lastprice, 0, $langs, 0, 0, -1, $conf->currency),
-				"title" => $langs->trans("LastPrice").': '.price($lastprice, 0, $langs, 0, 0, -1, $conf->currency),
-				'fourn_qty' => 0
-			);
+			if (!empty($logs) && isset($logs[0])) {
+				$log_recent = $logs[0];
+				$lastprice = $log_recent->fourn_price;
+				$prices[] = array(
+					"id" => 'lastprice',
+					"price" => price2num($lastprice),
+					"label" => $langs->trans("LastPrice") . ': ' . price($lastprice, 0, $langs, 0, 0, -1, $conf->currency),
+					"title" => $langs->trans("LastPrice") . ': ' . price($lastprice, 0, $langs, 0, 0, -1, $conf->currency),
+					'fourn_qty' => 0
+				);
 
-			$prices[] = array(
-				"id" => 'inputprice',
-				"price" => '0',
-				"label" => $langs->trans("InputPrice"),
-				"title" => $langs->trans("InputPrice"),
-				'fourn_qty' => 0
-			);
+				$prices[] = array(
+					"id" => 'inputprice',
+					"price" => '0',
+					"label" => $langs->trans("InputPrice"),
+					"title" => $langs->trans("InputPrice"),
+					'fourn_qty' => 0
+				);
+			} else {
+				return false;
+			}
 		}
 
 		return $prices;
