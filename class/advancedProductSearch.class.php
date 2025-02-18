@@ -74,6 +74,7 @@ class AdvancedProductSearch
 	 *
 	 */
 	public function __construct(){
+		$this->search['limit'] = getDolGlobalInt('ADVANCED_PRODUCT_SEARCH_LIMIT') > 0 ? getDolGlobalInt('ADVANCED_PRODUCT_SEARCH_LIMIT') : $this->search['limit'];
 		$this->setSearchParamDefaultValues();
 	}
 
