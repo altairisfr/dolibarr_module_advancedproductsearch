@@ -562,19 +562,19 @@ class AdvancedProductSearch
 		$output.= ' <input type="text" class="flat"  name="search_label" value="'.dol_htmlentities($this->search['search_label']).'" placeholder="'.$langs->trans('SearchLabel').'" />';
 		$output.= '	</th>';
 
+		// Fields from hook
+		$hookmanager->executeHooks('printFieldListOption', $hooksParameters, $object, $action); // Note that $action and $object may have been modified by hook
+		$output .= $hookmanager->resPrint;
+
+		if (isModEnabled('fournisseur')) {
+			$output.= '	<th class="advanced-product-search-col --supplier" ></th>';
+		// 	$output .= '	<th class="advanced-product-search-col --buy-price" ></th>';
+		}
 
 		if(isModEnabled('stock')){
 			$output.= '	<th class="advanced-product-search-col --stock-reel center" ></th>';
 			$output.= '	<th class="advanced-product-search-col --stock-theorique center" ></th>';
 		}
-
-		// Fields from hook
-		$hookmanager->executeHooks('printFieldListOption', $hooksParameters, $object, $action); // Note that $action and $object may have been modified by hook
-		$output .= $hookmanager->resPrint;
-
-		// if (isModEnabled('fournisseur')) {
-		// 	$output .= '	<th class="advanced-product-search-col --buy-price" ></th>';
-		// }
 		// $output.= '	<th class="advanced-product-search-col --tauxmarque" ></th>';
 		$output.= '	<th class="advanced-product-search-col --subprice" ></th>';
 		// $output.= '	<th class="advanced-product-search-col --discount" ></th>';
@@ -608,22 +608,23 @@ class AdvancedProductSearch
 			. self::getDialogColSortLink($langs->trans('Label'), $this->search['pageUrl'], "p.label", $param, $this->search['sortfield'], $this->search['sortorder'], $classForSortLink)
 			.'</th>';
 
-		if(isModEnabled('stock')){
-			$output.= '	<th class="advanced-product-search-col --stock-reel center" >'.$langs->trans('RealStock').'</th>';
-			$output.= '	<th class="advanced-product-search-col --stock-theorique center" >'.$langs->trans('VirtualStock').'</th>';
-			$colNumber+=2;
-		}
-
 		// Hook fields
 		$hookParam = $hooksParameters;
 		$hookParam['colNumber']=& $colNumber;
 		$hookmanager->executeHooks('printFieldListTitle', $hookParam, $object, $action); // Note that $action and $object may have been modified by hook
 		$output .= $hookmanager->resPrint;
 
-		// if (isModEnabled('fournisseur')) {
+		if (isModEnabled('fournisseur')) {
+			$output .= '	<th class="advanced-product-search-col --supplier" >' . $langs->trans('Supplier') . '</th>';
 		// 	$colNumber++;
 		// 	$output .= '	<th class="advanced-product-search-col --buy-price" >' . ($isSupplier ? $langs->trans('PredefinedFournPricesForFill').img_help(1, $langs->trans('PredefinedFournPricesForFillHelp')) : $langs->trans('BuyPrice')) . '</th>';
-		// }
+		}
+		if(isModEnabled('stock')){
+			$output.= '	<th class="advanced-product-search-col --stock-reel center" >'.$langs->trans('RealStock').'</th>';
+			$output.= '	<th class="advanced-product-search-col --stock-theorique center" >'.$langs->trans('VirtualStock').'</th>';
+			$colNumber+=2;
+		}
+
 		// $output.= '	<th class="advanced-product-search-col --tauxmarque" >'.$langs->trans('TauxMarque').'</th>';
 		$output.= '	<th class="advanced-product-search-col --subprice" >'.$langs->trans('Price').'</th>';
 		// $output.= '	<th class="advanced-product-search-col --discount" >'.$langs->trans('Discount').'</th>';
@@ -710,17 +711,28 @@ class AdvancedProductSearch
 							$output .= '<tr class="advanced-product-search-row --data" data-product="' . $product->id . '"  >';
 							$output .= '<td class="advanced-product-search-col --ref" >' . $product->getNomUrl(1) . '</td>';
 							$output .= '<td class="advanced-product-search-col --label" >' . self::highlightWordsOfSearchQuery($product->label, $this->search['search_label'] . ' ' . $this->search['sall']) . '</td>';
-							if (isModEnabled('stock')) {
-								$output .= '<td class="advanced-product-search-col --stock-reel" >' . $product->stock_reel . '</td>';
-								$output .= '<td class="advanced-product-search-col --stock-theorique" >' . $product->stock_theorique . '</td>';
-							}
 
 							$hookParam = $hooksParameters;
 							$hookParam['product'] = $product;
 							$hookmanager->executeHooks('printFieldListValue', $hookParam, $object, $action); // Note that $action and $object may have been modified by hook
 							$output .= $hookmanager->resPrint;
 
-// 							if (isModEnabled('fournisseur')) {
+							if (isModEnabled('fournisseur')) {
+								$supids = $product->list_suppliers();
+								$supplier = new Fournisseur($db);
+
+								// Works if there is only one supplier
+								// else the last one will be used
+								foreach ($supids as $socid) {
+									$supplier->id = $socid;
+								}
+								$supplier->fetch($supplier->id);
+								$output .= '<td class="advanced-product-search-col --supplier" >';
+								if ($supplier->id > 0) {
+									$output .= $supplier->getNomUrl(1);
+								}
+								$output .= '</td>';
+
 // 								$output .= '<td class="advanced-product-search-col --buy-price" >';
 // 								$TFournPriceList = self::getFournPriceList($product->id, $isSupplier ? $object->socid : 0);
 // 								if (!empty($TFournPriceList)) {
@@ -786,7 +798,17 @@ class AdvancedProductSearch
 // 								$output .= '<br/>';
 // 								$output .= '<input id="buying_price_adv"  type="number" step="any" min="0" maxlength="8" size="3" class="flat maxwidth75 right hideobject buying_price_adv on-update-calc-buyingprice" name="buying_price_adv_' . $product->id . '" value="0" data-product="' . $product->id . '">';
 // 								$output .= '</td>';
-// 							}
+							}
+
+							if (isModEnabled('stock')) {
+								$output .= '<td class="advanced-product-search-col --stock-reel" >' . $product->stock_reel . '</td>';
+								$output .= '<td class="advanced-product-search-col --stock-theorique" >' . $product->stock_theorique . '</td>';
+							}
+
+							$hookParam = $hooksParameters;
+							$hookParam['product'] = $product;
+							$hookmanager->executeHooks('printFieldListValue', $hookParam, $object, $action); // Note that $action and $object may have been modified by hook
+							$output .= $hookmanager->resPrint;
 
 							//Taux de marque
 							// $tauxmarque = 0;
