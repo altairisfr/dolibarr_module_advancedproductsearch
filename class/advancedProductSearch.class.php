@@ -14,6 +14,10 @@ class AdvancedProductSearch
 	public $fieldsToSearchAll;
 	public $fieldsToSearchAllText;
 	public $searchSqlList;
+	public $searchSqlSelect;
+	public $searchSql;
+	public $searchCategoryProductSqlList;
+	public $searchubprice;
 
 	/**
 	 * @var string[]
@@ -29,7 +33,7 @@ class AdvancedProductSearch
 
 	/**
 	 * Search params
-	 * @var string[]
+	 * @var array<string|array|int>
 	 */
 	public $search =  array(
 		'newToken' => '',
@@ -49,7 +53,7 @@ class AdvancedProductSearch
 		'search_label' => '',
 		//	'search_vatrate'
 		'search_category_product_operator' => 0,
-		'search_category_product_list' => '',
+		'search_category_product_list' => array(),
 		'search_tosell' => 1,
 		'search_tobuy' => 1,
 		'fourn_id' => '',
@@ -162,8 +166,11 @@ class AdvancedProductSearch
 		if ($this->search['limit'] > 0 && $this->search['limit'] != $conf->liste_limit) $this->urlParams['limit'] = $this->search['limit'];
 		if ($this->search['sall']) $this->urlParams['sall'] = $this->search['sall'];
 		if ($this->search['search_category_product_operator'] == 1) $this->urlParams['search_category_product_operator'] = $this->search['search_category_product_operator'];
-		foreach ($this->search['search_category_product_list'] as $this->searchearchCategoryProduct) {
-			$this->urlParams['search_category_product_list[]'] = $this->search['searchearchCategoryProduct'];
+
+		$i = 0;
+		foreach ($this->search['search_category_product_list'] as $searchCategoryProduct) {
+			$this->urlParams['search_category_product_list[' . $i . ']'] = $searchCategoryProduct;
+			$i++;
 		}
 		if ($this->search['search_ref']) $this->urlParams['search_ref'] = $this->search['search_ref'];
 		if ($this->search['search_supplierref']) $this->urlParams['search_supplierref'] = $this->search['search_supplierref'];
@@ -185,7 +192,8 @@ class AdvancedProductSearch
 	public function urlParamsToString(){
 		$params = array();
 		foreach ($this->urlParams as $key => $value){
-			$params[] = $key.'='.urlencode($value);
+			$keycode = preg_replace('/\[\d+\]/', '[]', $key);
+			$params[] = $keycode.'='.urlencode($value);
 		}
 
 		return implode('&', $params);
@@ -294,6 +302,7 @@ class AdvancedProductSearch
 
 		$currentQtyByProduct = array();
 		$object = self::objectAutoLoad($this->search['element'], $db);
+		/** @var CommonObject $object */
 		if($object > 0){
 			if($object->fetch($this->search['fk_element'])) {
 				$object->fetch_thirdparty();
@@ -393,28 +402,28 @@ class AdvancedProductSearch
 		if ($this->search['catid'] > 0)     $this->searchSql .= " AND cp.fk_categorie = ".$this->search['catid'];
 		if ($this->search['catid'] == -2)   $this->searchSql .= " AND cp.fk_categorie IS NULL";
 
-		$this->searchearchCategoryProductSqlList = array();
+		$this->searchCategoryProductSqlList = array();
 		if ($this->search['search_category_product_operator'] == 1) {
-			foreach ($this->search['search_category_product_list'] as $this->searchearchCategoryProduct) {
-				if (intval($this->searchearchCategoryProduct) == -2) {
-					$this->searchearchCategoryProductSqlList[] = "cp.fk_categorie IS NULL";
-				} elseif (intval($this->searchearchCategoryProduct) > 0) {
-					$this->searchearchCategoryProductSqlList[] = "cp.fk_categorie = ".$db->escape($this->searchearchCategoryProduct);
+			foreach ($this->search['search_category_product_list'] as $searchCategoryProduct) {
+				if (intval($searchCategoryProduct) == -2) {
+					$this->searchCategoryProductSqlList[] = "cp.fk_categorie IS NULL";
+				} elseif (intval($searchCategoryProduct) > 0) {
+					$this->searchCategoryProductSqlList[] = "cp.fk_categorie = ".$db->escape($searchCategoryProduct);
 				}
 			}
-			if (!empty($this->searchearchCategoryProductSqlList)) {
-				$this->searchSql .= " AND (".implode(' OR ', $this->searchearchCategoryProductSqlList).")";
+			if (!empty($this->searchCategoryProductSqlList)) {
+				$this->searchSql .= " AND (".implode(' OR ', $this->searchCategoryProductSqlList).")";
 			}
 		} else {
-			foreach ($this->search['search_category_product_list'] as $this->searchearchCategoryProduct) {
-				if (intval($this->searchearchCategoryProduct) == -2) {
-					$this->searchearchCategoryProductSqlList[] = "cp.fk_categorie IS NULL";
-				} elseif (intval($this->searchearchCategoryProduct) > 0) {
-					$this->searchearchCategoryProductSqlList[] = "p.rowid IN (SELECT fk_product FROM ".MAIN_DB_PREFIX."categorie_product WHERE fk_categorie = ".$this->searchearchCategoryProduct.")";
+			foreach ($this->search['search_category_product_list'] as $searchCategoryProduct) {
+				if (intval($searchCategoryProduct) == -2) {
+					$this->searchCategoryProductSqlList[] = "cp.fk_categorie IS NULL";
+				} elseif (intval($searchCategoryProduct) > 0) {
+					$this->searchCategoryProductSqlList[] = "p.rowid IN (SELECT fk_product FROM ".MAIN_DB_PREFIX."categorie_product WHERE fk_categorie = ".$searchCategoryProduct.")";
 				}
 			}
-			if (!empty($this->searchearchCategoryProductSqlList)) {
-				$this->searchSql .= " AND (".implode(' AND ', $this->searchearchCategoryProductSqlList).")";
+			if (!empty($this->searchCategoryProductSqlList)) {
+				$this->searchSql .= " AND (".implode(' AND ', $this->searchCategoryProductSqlList).")";
 			}
 		}
 		if ($this->search['fourn_id'] > 0)  $this->searchSql .= " AND pfp.fk_soc = ".((int) $this->search['fourn_id']);
