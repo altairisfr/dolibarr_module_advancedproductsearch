@@ -562,13 +562,13 @@ class AdvancedProductSearch
 		$hookmanager->executeHooks('printFieldListOption', $hooksParameters, $object, $action); // Note that $action and $object may have been modified by hook
 		$output .= $hookmanager->resPrint;
 
-		if (isModEnabled('fournisseur')) {
-			$output .= '	<th class="advanced-product-search-col --buy-price" ></th>';
-		}
-		$output.= '	<th class="advanced-product-search-col --tauxmarque" ></th>';
+		// if (isModEnabled('fournisseur')) {
+		// 	$output .= '	<th class="advanced-product-search-col --buy-price" ></th>';
+		// }
+		// $output.= '	<th class="advanced-product-search-col --tauxmarque" ></th>';
 		$output.= '	<th class="advanced-product-search-col --subprice" ></th>';
-		$output.= '	<th class="advanced-product-search-col --discount" ></th>';
-		$output.= '	<th class="advanced-product-search-col --finalsubprice" ></th>';
+		// $output.= '	<th class="advanced-product-search-col --discount" ></th>';
+		// $output.= '	<th class="advanced-product-search-col --finalsubprice" ></th>';
 		$output.= '	<th class="advanced-product-search-col --qty" ></th>';
 
 		if (!empty(getDolGlobalString('PRODUCT_USE_UNITS'))) {
@@ -610,14 +610,14 @@ class AdvancedProductSearch
 		$hookmanager->executeHooks('printFieldListTitle', $hookParam, $object, $action); // Note that $action and $object may have been modified by hook
 		$output .= $hookmanager->resPrint;
 
-		if (isModEnabled('fournisseur')) {
-			$colNumber++;
-			$output .= '	<th class="advanced-product-search-col --buy-price" >' . ($isSupplier ? $langs->trans('PredefinedFournPricesForFill').img_help(1, $langs->trans('PredefinedFournPricesForFillHelp')) : $langs->trans('BuyPrice')) . '</th>';
-		}
-		$output.= '	<th class="advanced-product-search-col --tauxmarque" >'.$langs->trans('TauxMarque').'</th>';
+		// if (isModEnabled('fournisseur')) {
+		// 	$colNumber++;
+		// 	$output .= '	<th class="advanced-product-search-col --buy-price" >' . ($isSupplier ? $langs->trans('PredefinedFournPricesForFill').img_help(1, $langs->trans('PredefinedFournPricesForFillHelp')) : $langs->trans('BuyPrice')) . '</th>';
+		// }
+		// $output.= '	<th class="advanced-product-search-col --tauxmarque" >'.$langs->trans('TauxMarque').'</th>';
 		$output.= '	<th class="advanced-product-search-col --subprice" >'.$langs->trans('Price').'</th>';
-		$output.= '	<th class="advanced-product-search-col --discount" >'.$langs->trans('Discount').'</th>';
-		$output.= '	<th class="advanced-product-search-col --finalsubprice" >'.$langs->trans('FinalDiscountSubPrice').'</th>';
+		// $output.= '	<th class="advanced-product-search-col --discount" >'.$langs->trans('Discount').'</th>';
+		// $output.= '	<th class="advanced-product-search-col --finalsubprice" >'.$langs->trans('FinalDiscountSubPrice').'</th>';
 		$output.= '	<th class="advanced-product-search-col --qty" >'.$langs->trans('Qty').'</th>';
 
 		if (!empty(getDolGlobalString('PRODUCT_USE_UNITS'))) {
@@ -710,90 +710,90 @@ class AdvancedProductSearch
 							$hookmanager->executeHooks('printFieldListValue', $hookParam, $object, $action); // Note that $action and $object may have been modified by hook
 							$output .= $hookmanager->resPrint;
 
-							if (isModEnabled('fournisseur')) {
-								$output .= '<td class="advanced-product-search-col --buy-price" >';
-								$TFournPriceList = self::getFournPriceList($product->id, $isSupplier ? $object->socid : 0);
-								if (!empty($TFournPriceList)) {
-//						$output.= '<div class="default-visible" >'.price($product->pmp).'</div>';
-//						$output.= '<div class="default-hidden" >';
+// 							if (isModEnabled('fournisseur')) {
+// 								$output .= '<td class="advanced-product-search-col --buy-price" >';
+// 								$TFournPriceList = self::getFournPriceList($product->id, $isSupplier ? $object->socid : 0);
+// 								if (!empty($TFournPriceList)) {
+// //						$output.= '<div class="default-visible" >'.price($product->pmp).'</div>';
+// //						$output.= '<div class="default-hidden" >';
 
-									$this->searchSelectArray = array();
-									$idSelected = '';
+// 									$this->searchSelectArray = array();
+// 									$idSelected = '';
 
-									foreach ($TFournPriceList as $TpriceInfos) {
-										$this->searchSelectArray[$TpriceInfos['id']] = array(
-											'label' => $TpriceInfos['label'],
-											'data-up' => $TpriceInfos['price'],
-											'data-fourn_qty' => $TpriceInfos['fourn_qty']
-										);
-										if (isModEnabled('margin')) {
-											if (getDolGlobalInt('MARGIN_TYPE') == 1 && is_numeric($TpriceInfos['id'])) {
-												$idSelected = $TpriceInfos['id'];
-											} elseif (getDolGlobalString('MARGIN_TYPE') === 'pmp') {
-												$idSelected = 'pmpprice';
-											} elseif (getDolGlobalString('MARGIN_TYPE') === 'costprice') {
-												$idSelected = 'costprice';
-											}
-										} else {
-											if ($TpriceInfos['id'] == 'pmpprice' && !empty($TpriceInfos['price'])) {
-												$idSelected = 'pmpprice';
-											}
-										}
-									}
+// 									foreach ($TFournPriceList as $TpriceInfos) {
+// 										$this->searchSelectArray[$TpriceInfos['id']] = array(
+// 											'label' => $TpriceInfos['label'],
+// 											'data-up' => $TpriceInfos['price'],
+// 											'data-fourn_qty' => $TpriceInfos['fourn_qty']
+// 										);
+// 										if (isModEnabled('margin')) {
+// 											if (getDolGlobalInt('MARGIN_TYPE') == 1 && is_numeric($TpriceInfos['id'])) {
+// 												$idSelected = $TpriceInfos['id'];
+// 											} elseif (getDolGlobalString('MARGIN_TYPE') === 'pmp') {
+// 												$idSelected = 'pmpprice';
+// 											} elseif (getDolGlobalString('MARGIN_TYPE') === 'costprice') {
+// 												$idSelected = 'costprice';
+// 											}
+// 										} else {
+// 											if ($TpriceInfos['id'] == 'pmpprice' && !empty($TpriceInfos['price'])) {
+// 												$idSelected = 'pmpprice';
+// 											}
+// 										}
+// 									}
 
-									if ($isSupplier) { // Seuls les prix fournisseurs nous intéressent dans le cadre d'un document fournisseur (pas de PMP ou autre dans ce cas)
-										unset($this->searchSelectArray['pmpprice']);
-										unset($this->searchSelectArray['costprice']);
-										if (!empty($this->searchSelectArray)) {
-											if (count($this->searchSelectArray) == 1 && ($object->element !== 'supplier_proposal' || getDolGlobalString('ADVANCED_PRODUCT_SEARCH_PRESELECT_IF_ONE_FOURN_PRICE_ON_SUPPLIER_PROPOSAL'))) {
-												$idSelected = key($this->searchSelectArray);
-												$this->searchubprice = $this->searchSelectArray[$idSelected]['data-up'];
-												// Recalcul du subprice final
-												$finalSubprice = $this->searchubprice - $this->searchubprice * $reduction / 100;
-											}
-											// On insère une valeur vide, car si plusieurs prix fourn, on laisse le choix à l'utilisateur de sélectionner celui qu'il souhaite
-											$this->searchSelectArray[0] = array('data-up' => 0, 'data-fourn_qty' => 0);
-										}
-									}
+// 									if ($isSupplier) { // Seuls les prix fournisseurs nous intéressent dans le cadre d'un document fournisseur (pas de PMP ou autre dans ce cas)
+// 										unset($this->searchSelectArray['pmpprice']);
+// 										unset($this->searchSelectArray['costprice']);
+// 										if (!empty($this->searchSelectArray)) {
+// 											if (count($this->searchSelectArray) == 1 && ($object->element !== 'supplier_proposal' || getDolGlobalString('ADVANCED_PRODUCT_SEARCH_PRESELECT_IF_ONE_FOURN_PRICE_ON_SUPPLIER_PROPOSAL'))) {
+// 												$idSelected = key($this->searchSelectArray);
+// 												$this->searchubprice = $this->searchSelectArray[$idSelected]['data-up'];
+// 												// Recalcul du subprice final
+// 												$finalSubprice = $this->searchubprice - $this->searchubprice * $reduction / 100;
+// 											}
+// 											// On insère une valeur vide, car si plusieurs prix fourn, on laisse le choix à l'utilisateur de sélectionner celui qu'il souhaite
+// 											$this->searchSelectArray[0] = array('data-up' => 0, 'data-fourn_qty' => 0);
+// 										}
+// 									}
 
 
-									$key_in_label = 0;
-									$value_as_key = 0;
-									$moreparam = 'data-product="' . $product->id . '"';
-									$translate = 0;
-									$maxlen = 0;
-									$disabled = 0;
-									$this->searchSort = $isSupplier ? 'ASC' : 'DESC';
-									$morecss = 'search-list-select';
-									$addjscombo = 0;
-									if (!empty($this->searchSelectArray)) {
-										$output .= $form->selectArray('prodfourprice-' . $product->id, $this->searchSelectArray, $idSelected, 0, $key_in_label, $value_as_key, $moreparam, $translate, $maxlen, $disabled, $this->searchSort, $morecss, $addjscombo);
-									}
-//						$output.= '</div>';
-								} else {
-									$output .= price($product->pmp);
-								}
-								$output .= '<br/>';
-								$output .= '<input id="buying_price_adv"  type="number" step="any" min="0" maxlength="8" size="3" class="flat maxwidth75 right hideobject buying_price_adv on-update-calc-buyingprice" name="buying_price_adv_' . $product->id . '" value="0" data-product="' . $product->id . '">';
-								$output .= '</td>';
-							}
+// 									$key_in_label = 0;
+// 									$value_as_key = 0;
+// 									$moreparam = 'data-product="' . $product->id . '"';
+// 									$translate = 0;
+// 									$maxlen = 0;
+// 									$disabled = 0;
+// 									$this->searchSort = $isSupplier ? 'ASC' : 'DESC';
+// 									$morecss = 'search-list-select';
+// 									$addjscombo = 0;
+// 									if (!empty($this->searchSelectArray)) {
+// 										$output .= $form->selectArray('prodfourprice-' . $product->id, $this->searchSelectArray, $idSelected, 0, $key_in_label, $value_as_key, $moreparam, $translate, $maxlen, $disabled, $this->searchSort, $morecss, $addjscombo);
+// 									}
+// //						$output.= '</div>';
+// 								} else {
+// 									$output .= price($product->pmp);
+// 								}
+// 								$output .= '<br/>';
+// 								$output .= '<input id="buying_price_adv"  type="number" step="any" min="0" maxlength="8" size="3" class="flat maxwidth75 right hideobject buying_price_adv on-update-calc-buyingprice" name="buying_price_adv_' . $product->id . '" value="0" data-product="' . $product->id . '">';
+// 								$output .= '</td>';
+// 							}
 
 							//Taux de marque
-							$tauxmarque = 0;
-							if (!empty($idSelected) && isset($this->searchSelectArray[$idSelected])) {
-								// Convertir en float pour éviter les erreurs de type
-								$selectedPrice = floatval($this->searchSelectArray[$idSelected]['data-up']);
-								if ($this->searchubprice <=0){
-									$tauxmarque = 0;
-								}else{
-									$tauxmarque = (($this->searchubprice - $selectedPrice) / $this->searchubprice) * 100;
-								}
-							}
+							// $tauxmarque = 0;
+							// if (!empty($idSelected) && isset($this->searchSelectArray[$idSelected])) {
+							// 	// Convertir en float pour éviter les erreurs de type
+							// 	$selectedPrice = floatval($this->searchSelectArray[$idSelected]['data-up']);
+							// 	if ($this->searchubprice <=0){
+							// 		$tauxmarque = 0;
+							// 	}else{
+							// 		$tauxmarque = (($this->searchubprice - $selectedPrice) / $this->searchubprice) * 100;
+							// 	}
+							// }
 
-							$output .= '<td class="advanced-product-search-col --tauxmarque right nowraponall" >';
-							$output .= '<input id="advanced-product-search-list-input-tauxmarque-' . $product->id . '" data-product="' . $product->id . '"  class="right maxwidth40 on-update-calc-tauxmarque" type="number" step="any" min="0" maxlength="8" size="3" name="tauxmarque" value="'.round($tauxmarque, 2).'">';
-							$output .= ' %';
-							$output .= '</td>';
+							// $output .= '<td class="advanced-product-search-col --tauxmarque right nowraponall" >';
+							// $output .= '<input id="advanced-product-search-list-input-tauxmarque-' . $product->id . '" data-product="' . $product->id . '"  class="right maxwidth40 on-update-calc-tauxmarque" type="number" step="any" min="0" maxlength="8" size="3" name="tauxmarque" value="'.round($tauxmarque, 2).'">';
+							// $output .= ' %';
+							// $output .= '</td>';
 
 							// Prix
 							$output .= '<td class="advanced-product-search-col --subprice right nowraponall" >';
@@ -802,15 +802,15 @@ class AdvancedProductSearch
 							$output .= '</td>';
 
 							// REDUCTION EN %
-							$output .= '<td class="advanced-product-search-col --discount center" >';
-							$output .= '<input id="advanced-product-search-list-input-reduction-' . $product->id . '"  data-product="' . $product->id . '"   class="advanced-product-search-list-input-reduction center on-update-calc-prices" type="number" step="any" min="0" max="100" maxlength="3" size="3" value="' . $reduction . '" placeholder="%" name="prodreduction[' . $product->id . ']" />';
-							$output .= '%';
-							$output .= '</td>';
+							// $output .= '<td class="advanced-product-search-col --discount center" >';
+							// $output .= '<input id="advanced-product-search-list-input-reduction-' . $product->id . '"  data-product="' . $product->id . '"   class="advanced-product-search-list-input-reduction center on-update-calc-prices" type="number" step="any" min="0" max="100" maxlength="3" size="3" value="' . $reduction . '" placeholder="%" name="prodreduction[' . $product->id . ']" />';
+							// $output .= '%';
+							// $output .= '</td>';
 
-							// FINAL SUBPRICE AFTER REDUCTION
-							$output .= '<td class="advanced-product-search-col --finalsubprice right" >';
-							$output .= '<span id="discount-prod-list-final-subprice-' . $product->id . '"  class="final-subpriceprice" >' . price(round($finalSubprice, getDolGlobalString('MAIN_MAX_DECIMALS_UNIT'))) . '</span> ' . $langs->trans("HT");
-							$output .= '</td>';
+							// // FINAL SUBPRICE AFTER REDUCTION
+							// $output .= '<td class="advanced-product-search-col --finalsubprice right" >';
+							// $output .= '<span id="discount-prod-list-final-subprice-' . $product->id . '"  class="final-subpriceprice" >' . price(round($finalSubprice, getDolGlobalString('MAIN_MAX_DECIMALS_UNIT'))) . '</span> ' . $langs->trans("HT");
+							// $output .= '</td>';
 
 							// QTY
 							$output .= '<td class="advanced-product-search-col --qty nowrap" >';
