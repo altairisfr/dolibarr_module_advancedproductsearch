@@ -835,7 +835,8 @@ class AdvancedProductSearch
 
 							// REDUCTION EN %
 							// $output .= '<td class="advanced-product-search-col --discount center" >';
-							// $output .= '<input id="advanced-product-search-list-input-reduction-' . $product->id . '"  data-product="' . $product->id . '"   class="advanced-product-search-list-input-reduction center on-update-calc-prices" type="number" step="any" min="0" max="100" maxlength="3" size="3" value="' . $reduction . '" placeholder="%" name="prodreduction[' . $product->id . ']" />';
+							// this field is required. As LacWine doesn’t use discount, we just set reduction to 0
+							$output .= '<input id="advanced-product-search-list-input-reduction-' . $product->id . '"  data-product="' . $product->id . '" type="hidden" value="0" name="prodreduction[' . $product->id . ']" />';
 							// $output .= '%';
 							// $output .= '</td>';
 
