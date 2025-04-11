@@ -984,8 +984,8 @@ class AdvancedProductSearch
 	 * Return an object
 	 *
 	 * @param string $objectType Type of object ('invoice', 'order', 'expedition_bon', 'myobject@mymodule', ...)
-	 * @param $db
-	 * @return int object of $objecttype
+	 * @param DoliDB $db
+	 * @return CommonObject object of $objecttype
 	 */
 	public static function objectAutoLoad($objectType, &$db)
 	{
