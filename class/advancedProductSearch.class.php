@@ -1279,7 +1279,7 @@ class AdvancedProductSearch
 				$baseSubPrice = $product->price;
 			}
 
-			return round(floatval($baseSubPrice), getDolGlobalString('MAIN_MAX_DECIMALS_UNIT'));
+			return round(floatval(price2num($baseSubPrice)), getDolGlobalString('MAIN_MAX_DECIMALS_UNIT'));
 		}
 
 		return false;
