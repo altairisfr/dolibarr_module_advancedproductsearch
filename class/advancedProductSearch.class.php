@@ -835,8 +835,8 @@ class AdvancedProductSearch
 
 							// REDUCTION EN %
 							// $output .= '<td class="advanced-product-search-col --discount center" >';
-							// this field is required. As LacWine doesn’t use discount, we just set reduction to 0
-							$output .= '<input id="advanced-product-search-list-input-reduction-' . $product->id . '"  data-product="' . $product->id . '" type="hidden" value="0" name="prodreduction[' . $product->id . ']" />';
+							// Récupération de la remise relative du client, ne pas passer par $reduction ; Recovering the customer's discount, do not use a $reduction
+							$output .= '<input id="advanced-product-search-list-input-reduction-' . $product->id . '"  data-product="' . $product->id . '" type="hidden" value="'.$object->thirdparty->remise_percent.'" name="prodreduction[' . $product->id . ']" />';
 							// $output .= '%';
 							// $output .= '</td>';
 
